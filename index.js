@@ -18,6 +18,10 @@ const PORT =  5050;
 const app = express();
 app.use(cors());
 
+const path = require("path");
+
+app.use(express.static(path.join(__dirname, "build"))); 
+
 //middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:false}));
