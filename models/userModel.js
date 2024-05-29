@@ -1,6 +1,5 @@
 const mongoose=require('mongoose');
 
-// Declare the Schema of the Mongo model
 var userSchema = new mongoose.Schema({
     name:{
         type:String,
@@ -9,6 +8,7 @@ var userSchema = new mongoose.Schema({
     email:{
         type:String,
         required:true,
+        unique:true,
     },
     mobile:{
         type:String,
@@ -47,7 +47,9 @@ userSchema.pre("save", async function (next) {
     if (!this.isModified("password")) {
       next();
     }
-   
+
+    this.password=bcrypt.hash(this.password,10)
+    next()
   });
  
   userSchema.methods.createPasswordResetToken = async function () {
