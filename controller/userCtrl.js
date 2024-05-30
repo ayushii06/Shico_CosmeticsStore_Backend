@@ -1,4 +1,6 @@
-const User =require('../models/userModel.js')
+const User =require('../models/UserModel.js')
+const OTP = require('../models/OtpModel.js')
+const otpGenerator = require('otp-generator');
 const {body,validationResult}=require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -12,18 +14,35 @@ const crypto = require("crypto");
 exports.signUp = async(req,res)=>{
   let success=false;
   try{
-      let user = await User.findOne({email:req.body.email});
-      if(user){
+    const {name,email,mobile,password,cpass,otp} = req.body;
+      let user_email = await User.findOne({email:email});
+      if(user_email){
           return res.status(400).json({success,error:"Email ALready exists"})
       }
 
-      const secPass = await bcrypt.hash(req.body.password,10);
-      user=await User.create({
-          name:req.body.name,
-          mobile:req.body.mobile,
-          email:req.body.email,
-          password:secPass,
+      let user_mobile = await User.findOne({mobile:mobile});
+      if(user_mobile){
+          return res.status(400).json({success,error:"Mobile Number ALready exists"})
+      }
 
+      if(password!==cpass){
+        return res.status(400).json({success,error:'Confirm password do not match'})
+      }
+
+      const recentOtp = OTP.findOne({email:email}).sort({createdAt:-1}).limit(1);
+     if(recentOtp.length ===0){
+        return res.status(400).json({success,error:'OTP not found'})
+     }
+     else if(recentOtp.otp !== otp){
+            return res.status(400).json({success,error:'OTP is incorrect'})
+     }
+
+      const secPass = await bcrypt.hash(password,10);
+      user=await User.create({
+          name,
+          email,
+          mobile,
+          password:secPass,
       })
 
       const data={
@@ -42,6 +61,36 @@ exports.signUp = async(req,res)=>{
 
 }
 
+exports.sendOTP = async(req,res)=>{
+    try{
+        const email = req.body;
+
+        const user = await User.find0ne({email:email});
+        if(user){
+            return res.status(401).json({error:"User already exists"});
+        }
+
+        const otp = otpGenerator.generate(6,{upperCase:false,specialChars:false,alphabets:false});
+
+        const alreadyExists = await OTP.findOne({otp:otp});
+
+        if(alreadyExists){
+            const otp = otpGenerator.generate(6,{upperCase:false,specialChars:false,alphabets:false});
+
+            const alreadyExists = await OTP.findOne({otp:otp});
+        }
+
+        const otpPayload = {email:email,otp:otp};
+
+        const newOTP = await OTP.create(otpPayload);
+
+        return res.status(200).json({success:true,message:"OTP sent successfully"});
+    }
+    catch(err){
+        console.log(err)
+        res.status(404).send('Internal Server Error')
+    }
+}
 
 exports.login = async (req,res)=>{
   try{
@@ -68,15 +117,15 @@ exports.login = async (req,res)=>{
               expiresIn:"2h",
           });
           user = user.toObject();
-          user.token = token;
+          user.accessToken = token;
           user.password = undefined;
           const options = {
               expiresIn: new Date(Date.now() + 3*24*60*60*1000),
               httpOnly:true,
           }
-          res.cookie("token",token,options).status(200).json({
+          res.cookie("token",accessToken,options).status(200).json({
               success:true,
-              token,
+              accessToken,
               user,
               message:'Logged in Successfully',
           });
@@ -96,60 +145,6 @@ exports.login = async (req,res)=>{
   }
 }
 
-
-// Create a User ----------------------------------------------
-
-// const createUser = asyncHandler(async (req, res) => {
-   
-//    const email = req.body.email;
-//    const findUser = await User.findOne({ email: email });
- 
-//    if (!findUser) {
-//      const salt = await bcrypt.genSalt(10);
-//      const secPass=await bcrypt.hash(req.body.password,salt);
-//      const newUser = await User.create({
-//       name:req.body.name,
-//       email:req.body.email,
-//       mobile:req.body.mobile,
-//       password:secPass,
-//    });
-//      res.json(newUser);
-//    } else {
-//      throw new Error("User Already Exists");
-//    }
-//  });
-
-// // Login/Verify a User ----------------------------------------------
-
-// //  const loginUserCtrl = asyncHandler(async (req, res) => {
-// //    const { email, password } = req.body;
-// //    // check if user exists or not
-// //    const findUser = await User.findOne({ email });
-// //    if (findUser && (await bcrypt.compare(password,findUser.password))) {
-// //      const refreshToken = await generateRefreshToken(findUser?._id);
-// //      const updateuser = await User.findByIdAndUpdate(
-// //        findUser.id,
-// //        {
-// //          refreshToken: refreshToken,
-// //        },
-// //        { new: true }
-// //      );
-// //      res.cookie("refreshToken", refreshToken, {
-// //        httpOnly: true,
-// //        maxAge: 72 * 60 * 60 * 1000,
-// //      });
-// //      res.json({
-// //        _id: findUser?._id,
-// //        name: findUser?.name,
-// //        email: findUser?.email,
-// //        mobile: findUser?.mobile,
-// //        token: generateToken(findUser?._id),
-// //      });
-// //    } else {
-// //      throw new Error("Invalid Credentials");
-// //    }
-// //  });
- 
 
 
 // const loginDetail =  (async (req, res) => {

@@ -1,7 +1,7 @@
 const express=require('express');
 // const {createUser,loginUserCtrl,loginDetail,saveAddress,handleRefreshToken,logout,getaUser,deleteaUser,updatePassword,forgotPasswordToken,resetPassword,getWishlist,userCart,getUserCart,emptyCart} = require('../controller/userCtrl')
-const {fetchuser}=require('../middlewares/fetchuser.js')
-const User =require('../models/userModel.js')
+const {fetchuser}=require('../middlewares/auth.js')
+const User =require('../models/UserModel.js')
 const {signUp,login}=require('../controller/userCtrl.js')
 
 const router = express.Router();
