@@ -1,6 +1,6 @@
 const mongoose = require("mongoose"); 
 
-// Declare the Schema of the Mongo model
+
 var cartSchema = new mongoose.Schema(
   {
     products: [

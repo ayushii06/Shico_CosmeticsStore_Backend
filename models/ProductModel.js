@@ -28,10 +28,6 @@ var productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  price:{
-    type:Number,
-    required:true,
-  },
   imgsrc:{
     type:String,
     required:true,
@@ -40,22 +36,11 @@ var productSchema = new mongoose.Schema({
     type:String,
     required:true
   },
-  sold: {
-    type: Number,
-    default: 0,
-  },
-  images: [
-    {
-      public_id: String,
-      url: String,
-    },
-  ],
   tags: [],
   ratings: [
     {
-      star: Number,
-      comment: String,
-      postedby: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Rating',
     },
   ],
   totalrating: {
@@ -66,5 +51,4 @@ var productSchema = new mongoose.Schema({
   { timestamps: true }
 );
 
-//Export the model
 module.exports = mongoose.model('Product', productSchema);
