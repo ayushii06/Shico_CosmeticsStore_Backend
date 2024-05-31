@@ -98,7 +98,7 @@ exports.sendOTP = async(req,res)=>{
 
 exports.login = async (req,res)=>{
   try{
-      const {email,password} = req.body;
+      const {email,password,role} = req.body;
       if(!email||!password){
         throw new ApiError(500,"Fill details carefully")
       }

@@ -1,10 +1,11 @@
 const ProductModel = require('../models/ProductModel.js');
-const User = require('../models/userModel.js')
+const User = require('../models/UserModel.js')
 const {body,validationResult}=require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const { getWishlist } = require('./userCtrl.js');
+const { ApiError } = require('../middlewares/ApiError.js');
 require('dotenv').config();
 
 //create a user
@@ -14,23 +15,24 @@ body('product_name','invalid Name').isLength({min:3}),
 body('desc','invalid description').isLength({min:5}),
 
 ],async (req, res) => {
+
+  const {product_name,desc,selling_price,market_price,category,images}=req.body;
    let success=false;
    //if there is error then show status 400 with the error
    const error=validationResult(req);
    if(!error.isEmpty()){
-      return res.status(400).json({success,error:error.array()});
+    throw new ApiError(400,error.array());
    }
 
    try{
    product = await ProductModel.create({
-      product_name:req.body.product_name,
-      desc:req.body.desc,
-     price:req.body.price,
-     category:req.body.category,
-     images:req.body.images,
-     tags:req.body.tags,
+      product_name,
+      desc,
+      selling_price,
+      market_price,
+      category,
    });
-   // user.toObject();
+  
    const data={
       product:{
          id:product.id
