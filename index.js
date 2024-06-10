@@ -7,6 +7,8 @@ const authRouter = require('./routes/auth.js')
 const cors = require('cors')
 const productRouter = require('./routes/ProductRoute.js')
 const cartRouter = require('./routes/CartRoutes.js')
+const fileupload = require('express-fileupload')
+const cloudinary = require('./config/cloudinary.js')
 
 
 
@@ -19,8 +21,13 @@ const app = express();
 app.use(cors());
 
 const path = require("path");
-
 app.use(express.static(path.join(__dirname, "build"))); 
+app.use(fileupload({
+  useTempFiles:true,
+  tempFileDir:'/tmp/'
+}))
+cloudinary.cloudinaryConnect();
+
 
 //middleware
 app.use(bodyParser.json());

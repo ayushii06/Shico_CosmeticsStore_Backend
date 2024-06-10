@@ -1,9 +1,10 @@
 const express = require("express");
-const { uploadImages } = require("../controller/uploadCtrl");
+const router = express.Router();
+const { localfileUpload } = require("../controller/fileCtrl");
 // const { fetchuser } = require("../middlewares/fetchuser");
 // const { uploadPhoto, productImgResize } = require("../middlewares/uploadImage");
-const router = express.Router();
 
-router.post('/localfileupload',uploadImages);
+
+router.post('/localfileupload',localfileUpload);
 
 module.exports = router;

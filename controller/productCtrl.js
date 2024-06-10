@@ -10,13 +10,12 @@ require('dotenv').config();
 
 //create a user
 
-const createProduct = ([ //express validation 
+const createProduct = ([
 body('product_name','invalid Name').isLength({min:3}),
 body('desc','invalid description').isLength({min:5}),
-
 ],async (req, res) => {
 
-  const {product_name,desc,selling_price,market_price,category,images}=req.body;
+  const {product_name,desc,selling_price,market_price,category,imagesrc , imagesrchover}=req.body;
    let success=false;
    //if there is error then show status 400 with the error
    const error=validationResult(req);
@@ -31,6 +30,8 @@ body('desc','invalid description').isLength({min:5}),
       selling_price,
       market_price,
       category,
+      imagesrc,
+      imagesrchover,
    });
   
    const data={
@@ -38,9 +39,11 @@ body('desc','invalid description').isLength({min:5}),
          id:product.id
       }
    }
+
    success=true;
    const authtoken=jwt.sign(data,process.env.JWT_SECRET);
    console.log(authtoken);
+   
    res.json({success,"authtoken":authtoken});
    } catch(error) {    
       console.error(error.message);
