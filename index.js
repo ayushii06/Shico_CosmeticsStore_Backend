@@ -8,9 +8,7 @@ const cors = require('cors')
 const productRouter = require('./routes/ProductRoute.js')
 const cartRouter = require('./routes/CartRoutes.js')
 const fileupload = require('express-fileupload')
-const cloudinary = require('./config/cloudinary.js')
-
-
+const { cloudinaryConnect } = require('./config/cloudinary.js')
 
 db();
 

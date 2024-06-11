@@ -29,12 +29,12 @@ var productSchema = new mongoose.Schema({
     required: true,
   },
   imgsrc:{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'File'
+    type: String,
+    required: true,
   },
   imghoversrc:{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'File'
+    type: String,
+    required: true,
   },
   tags: [],
   ratings: [
@@ -43,9 +43,17 @@ var productSchema = new mongoose.Schema({
       ref: 'Rating',
     },
   ],
+  avgRating: {
+    type: Number,
+    default: 0,
+  },
   totalrating: {
     type: String,
     default: 0,
+  },
+  buyer: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
   },
 },
   { timestamps: true }

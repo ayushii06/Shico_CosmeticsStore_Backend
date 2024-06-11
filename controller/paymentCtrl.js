@@ -3,7 +3,9 @@ const User = require('../models/UserModel');
 const Product = require('../models/ProductModel');
 const { ApiError } = require('../middlewares/ApiError');
 const { ApiSuccess } = require('../middlewares/ApiError');
-const { mongo, default: mongoose } = require('mongoose');
+const mailSender = require('../utils/mailSender');
+const crypto = require('crypto');
+
 
 exports.payment = async(req,res)=>{
     try {
@@ -72,4 +74,31 @@ exports.verifySignature = async(req,res)=>{
 
     shasum.update(JSON.stringify(req.body)) 
     const digest = shasum.digest('hex')
+
+    if(digest === signature){
+        console.log('Request is legit')
+
+        const {prodId} = req.body.payload.payment.entity.notes;
+
+        //mail the user
+        const emailResponse = await mailSender(
+            req.user.email,
+            'Payment Successful',
+            'Your payment is successful'
+        )
+
+        await Product.findByIdAndUpdate(prodId,{
+            $inc : {stock : -1},
+            buyer : req.user.id,
+        })
+
+        res.status(200).json({
+            success : true,
+            message : 'Payment is successful',
+            productId : prodId
+        })
+    }
+    else{
+        throw new ApiError(400,'Invalid Signature')
+    }
 }

@@ -7,4 +7,4 @@ class ApiSuccess {
     }
 }
 
-export { ApiSuccess }
+module.exports = { ApiSuccess }

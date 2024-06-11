@@ -9,6 +9,10 @@ var ratingSchema = new mongoose.Schema({
         type:Number,
         required:true,
     },
+    product:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:'Product',
+    },
     createdBy:{
         type:mongoose.Schema.Types.ObjectId,
         ref:'User',

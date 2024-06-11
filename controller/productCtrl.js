@@ -10,23 +10,15 @@ const { ApiError } = require('../middlewares/ApiError.js');
 const { ApiSuccess } = require('../middlewares/ApiError.js');
 require('dotenv').config();
 const {uploadFileToCloudinary}=require('../utils/uploadToCloudinary.js');
-
+const Category = require('../models/CategoryModel.js');
 
 //the seller creates product
-exports.createProduct = ([
-body('product_name','invalid Name').isLength({min:3}),
-body('desc','invalid description').isLength({min:5}),
-],async (req, res) => {
+exports.createProduct =async (req, res) => {
 
-  const {product_name,desc,selling_price,market_price,category}=req.body;
-   let success=false;
-   //if there is error then show status 400 with the error
-   const error=validationResult(req);
-   if(!error.isEmpty()){
-    throw new ApiError(400,error.array());
-   }
 
    try{
+    const {product_name,desc,selling_price,market_price,category}=req.body;
+   let success=false;
 
     const imgsrc = req.files.imgsrc;
     const imghoversrc = req.files.imghoversrc;
@@ -55,6 +47,12 @@ body('desc','invalid description').isLength({min:5}),
       imgsrc:imgsrcresponse.secure_url,
       imghoversrc:imghoversrcresponse.secure_url,
    });
+
+   //push the product id to the category
+    const Category = await Category.findById(category);
+    Category.products.push(product._id);
+    await Category.save();
+
   
    const data={
       product:{
@@ -71,8 +69,7 @@ body('desc','invalid description').isLength({min:5}),
       console.error(error.message);
       res.status(500).json({success,error:'Internal Server Error'});
 
-   }
- });
+   }};
 
 //the seller updates a product
 exports.updateProduct = asyncHandler(async(req,res)=>{
@@ -177,6 +174,20 @@ exports.getaProduct = asyncHandler(async (req, res) => {
    }
  });
 
+exports.fetchAllData = async(req,res)=>{
+  try{
+    const {prodId} = req.body;
+
+    const product = await ProductModel.findById(prodId).populate("ratings").exec(); 
+
+    if(!product){
+      throw new ApiError(400,"Product not found")
+    }
+  }
+  catch(err){
+    throw new ApiError(400,err.message)
+  }
+}
 
  exports.addToWishlist = asyncHandler(async (req, res) => {
    const { _id } = req.user;
