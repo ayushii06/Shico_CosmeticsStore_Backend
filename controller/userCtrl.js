@@ -174,7 +174,6 @@ exports.forgotPassword = async(req,res)=>{
 }
 
 
-
 // const loginDetail =  (async (req, res) => {
 //    console.log("its's here")
 //    const {id} = req.params;

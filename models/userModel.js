@@ -1,4 +1,7 @@
 const mongoose=require('mongoose');
+const mailSender = require("../utils/mailSender");
+const { ApiError } = require('../middlewares/ApiError');
+
 
 var userSchema = new mongoose.Schema({
     name:{
@@ -41,6 +44,10 @@ var userSchema = new mongoose.Schema({
     refreshToken: {
       type: String,
     },
+    additionalDetails:{
+      type:mongoose.Schema.Types.ObjectId,
+      ref:'Profile'
+    },
     passwordChangedAt: Date,
     passwordResetToken: String,
     passwordResetExpires: Date,
@@ -58,6 +65,16 @@ userSchema.pre("save", async function (next) {
     next()
   });
  
+
+userSchema.post("save",async function (doc){
+  try {
+    await mailSender(doc.email,'Welcome to our store','Welcome to our store, we are glad to have you on board. You are successfully registered. Thank you for choosing us!')
+    
+  } catch (error) {
+    throw new ApiError(400,error.message)
+  }  
+})
+
 userSchema.methods.createPasswordResetToken = async function () {
     const resettoken = crypto.randomBytes(32).toString("hex");
     this.passwordResetToken = crypto

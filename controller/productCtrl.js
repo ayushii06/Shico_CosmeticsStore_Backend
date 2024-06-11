@@ -1,21 +1,24 @@
 const ProductModel = require('../models/ProductModel.js');
 const User = require('../models/UserModel.js')
+const File = require('../models/File.js')
 const {body,validationResult}=require('express-validator');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const { getWishlist } = require('./userCtrl.js');
 const { ApiError } = require('../middlewares/ApiError.js');
+const { ApiSuccess } = require('../middlewares/ApiError.js');
 require('dotenv').config();
+const {uploadFileToCloudinary}=require('../utils/uploadToCloudinary.js');
 
-//create a user
 
-const createProduct = ([
+//the seller creates product
+exports.createProduct = ([
 body('product_name','invalid Name').isLength({min:3}),
 body('desc','invalid description').isLength({min:5}),
 ],async (req, res) => {
 
-  const {product_name,desc,selling_price,market_price,category,imagesrc , imagesrchover}=req.body;
+  const {product_name,desc,selling_price,market_price,category}=req.body;
    let success=false;
    //if there is error then show status 400 with the error
    const error=validationResult(req);
@@ -24,14 +27,33 @@ body('desc','invalid description').isLength({min:5}),
    }
 
    try{
+
+    const imgsrc = req.files.imgsrc;
+    const imghoversrc = req.files.imghoversrc;
+
+    const supportedTypes = ['png','jpg','jpeg','gif','webp',];
+    const imgsrcType = imgsrc.name.split('.')[1];
+    const imghoversrcType = imghoversrc.name.split('.')[1];
+    
+  if(!supportedTypes.includes(imgsrcType)){
+            throw new ApiError(400,'File type not supported');
+  }
+
+  if(!supportedTypes.includes(imghoversrcType)){
+    throw new ApiError(400,'File type not supported');
+  }
+
+    const imgsrcresponse = await uploadFileToCloudinary(imgsrc,process.env.CLOUDINARY_FOLDER);
+    const imghoversrcresponse = await uploadFileToCloudinary(imghoversrc,process.env.CLOUDINARY_FOLDER);
+
    product = await ProductModel.create({
       product_name,
       desc,
       selling_price,
       market_price,
       category,
-      imagesrc,
-      imagesrchover,
+      imgsrc:imgsrcresponse.secure_url,
+      imghoversrc:imghoversrcresponse.secure_url,
    });
   
    const data={
@@ -52,9 +74,51 @@ body('desc','invalid description').isLength({min:5}),
    }
  });
 
-//Get product -------------------------
+//the seller updates a product
+exports.updateProduct = asyncHandler(async(req,res)=>{
+  try {
+    const {product_name,desc,selling_price,market_price,category,id}=req.body;
 
-const getaProduct = async (req,res) =>{
+    const updatedProduct = await ProductModel.findByIdAndUpdate(id,
+      {
+        product_name,
+        desc,
+        selling_price,
+        market_price,
+        category
+      },
+      {
+        new:true,
+        runValidators:true
+      }
+    )
+    
+    res.status(200).json(new ApiSuccess(200,"Product updated successfully"))
+  } catch (error) {
+    throw new ApiError(400,error.message)
+  }
+})
+
+//the seller deletes a product
+exports.deleteProduct = asyncHandler(async (req, res) => {
+  try{
+    const {product_id} = req.params
+    const product = await ProductModel.findByIdAndDelete(product_id)
+
+    if(!product){
+      throw new ApiError(400,"Product not found")
+    }
+
+    res.status(200).json(new ApiSuccess(200,"Product deleted successfully"))
+
+  }
+  catch(err){
+    throw new ApiError(400,err.message)
+  }
+})
+
+//the customer find all the products on the website
+exports.getallProducts = async (req,res) =>{
    try {
       const products = await ProductModel.find()
       res.send(products)
@@ -65,7 +129,8 @@ const getaProduct = async (req,res) =>{
    
 }
 
-const getAllProduct = asyncHandler(async (req, res) => {
+//the customer finds a product by id (filtering, sorting, limiting fields, pagination)
+exports.getaProduct = asyncHandler(async (req, res) => {
    try {
      // Filtering
      const queryObj = { ...req.query };
@@ -113,7 +178,7 @@ const getAllProduct = asyncHandler(async (req, res) => {
  });
 
 
-const addToWishlist = asyncHandler(async (req, res) => {
+ exports.addToWishlist = asyncHandler(async (req, res) => {
    const { _id } = req.user;
    const { prodId } = req.body;
    try {
@@ -147,7 +212,7 @@ const addToWishlist = asyncHandler(async (req, res) => {
    }
  });
  
- const rating = asyncHandler(async (req, res) => {
+ exports.rating = asyncHandler(async (req, res) => {
    const { _id } = req.user;
    const { star, prodId, comment } = req.body;
    try {
@@ -184,7 +249,8 @@ const addToWishlist = asyncHandler(async (req, res) => {
          }
        );
      }
-     const getallratings = await ProductModel.findById(prodId);
+
+exports.getallratings = await ProductModel.findById(prodId);
      let totalRating = getallratings.ratings.length;
      let ratingsum = getallratings.ratings
        .map((item) => item.star)
@@ -203,5 +269,3 @@ const addToWishlist = asyncHandler(async (req, res) => {
    }
  });
 
-
-module.exports={createProduct,getaProduct,getAllProduct,getWishlist,addToWishlist,rating}

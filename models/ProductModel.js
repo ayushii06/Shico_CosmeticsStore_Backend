@@ -29,12 +29,12 @@ var productSchema = new mongoose.Schema({
     required: true,
   },
   imgsrc:{
-    type:String,
-    required:true,
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'File'
   },
   imghoversrc:{
-    type:String,
-    required:true
+    type:mongoose.Schema.Types.ObjectId,
+    ref:'File'
   },
   tags: [],
   ratings: [
