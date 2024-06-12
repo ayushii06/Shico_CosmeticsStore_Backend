@@ -1,13 +1,15 @@
 const express=require('express');
-const {createProduct,getaProduct,getAllProduct,getWishlist,addToWishlist,rating} = require('../controller/productCtrl')
+const {createProduct,updateProduct,deleteProduct,getallProducts,getaProduct,fetchAllData,addToWishlist,rating} = require('../controller/productCtrl')
 const {fetchuser}=require('../middlewares/auth.js')
 
 const router = express.Router();
 
 
 router.post("/add",createProduct);
-
-router.post("/:id",getaProduct)
+router.post("/update",updateProduct)
+router.post("/:product_id",deleteProduct)
+router.post("/getallProducts",getallProducts)
+router.post("/fetchAllData",fetchAllData)
 
 // router.put("/wishlist", fetchuser, addToWishlist);
 // router.put("/rating", fetchuser, rating);

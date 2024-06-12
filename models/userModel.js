@@ -1,5 +1,7 @@
 const mongoose=require('mongoose');
+const bcrypt=require('bcryptjs');
 const mailSender = require("../utils/mailSender");
+const registrationMessage= require('../mailTemplates/RegistrationSuccess');
 const { ApiError } = require('../middlewares/ApiError');
 
 
@@ -24,7 +26,6 @@ var userSchema = new mongoose.Schema({
     },
     cpass:{
       type:String,
-      required:true,
     },
     role:{
         type:String,
@@ -68,8 +69,11 @@ userSchema.pre("save", async function (next) {
 
 userSchema.post("save",async function (doc){
   try {
-    await mailSender(doc.email,'Welcome to our store','Welcome to our store, we are glad to have you on board. You are successfully registered. Thank you for choosing us!')
-    
+     await mailSender(
+			doc.email,
+			"Verification Email",
+			registrationMessage('Welcome to our store','Welcome to our store, we are glad to have you on board. You are successfully registered. Thank you for choosing us!')
+		);    
   } catch (error) {
     throw new ApiError(400,error.message)
   }  

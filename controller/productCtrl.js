@@ -72,7 +72,7 @@ exports.createProduct =async (req, res) => {
    }};
 
 //the seller updates a product
-exports.updateProduct = asyncHandler(async(req,res)=>{
+exports.updateProduct = async(req,res)=>{
   try {
     const {product_name,desc,selling_price,market_price,category,id}=req.body;
 
@@ -94,10 +94,10 @@ exports.updateProduct = asyncHandler(async(req,res)=>{
   } catch (error) {
     throw new ApiError(400,error.message)
   }
-})
+}
 
 //the seller deletes a product
-exports.deleteProduct = asyncHandler(async (req, res) => {
+exports.deleteProduct = async (req, res) => {
   try{
     const {product_id} = req.params
     const product = await ProductModel.findByIdAndDelete(product_id)
@@ -112,7 +112,7 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
   catch(err){
     throw new ApiError(400,err.message)
   }
-})
+}
 
 //the customer find all the products on the website
 exports.getallProducts = async (req,res) =>{
@@ -223,60 +223,3 @@ exports.fetchAllData = async(req,res)=>{
    }
  });
  
- exports.rating = asyncHandler(async (req, res) => {
-   const { _id } = req.user;
-   const { star, prodId, comment } = req.body;
-   try {
-     const product = await ProductModel.findById(prodId);
-     let alreadyRated = product.ratings.find(
-       (userId) => userId.postedby.toString() === _id.toString()
-     );
-     if (alreadyRated) {
-       const updateRating = await ProductModel.updateOne(
-         {
-           ratings: { $elemMatch: alreadyRated },
-         },
-         {
-           $set: { "ratings.$.star": star, "ratings.$.comment": comment },
-         },
-         {
-           new: true,
-         }
-       );
-     } else {
-       const rateProduct = await ProductModel.findByIdAndUpdate(
-         prodId,
-         {
-           $push: {
-             ratings: {
-               star: star,
-               comment: comment,
-               postedby: _id,
-             },
-           },
-         },
-         {
-           new: true,
-         }
-       );
-     }
-
-exports.getallratings = await ProductModel.findById(prodId);
-     let totalRating = getallratings.ratings.length;
-     let ratingsum = getallratings.ratings
-       .map((item) => item.star)
-       .reduce((prev, curr) => prev + curr, 0);
-     let actualRating = Math.round(ratingsum / totalRating);
-     let finalproduct = await ProductModel.findByIdAndUpdate(
-       prodId,
-       {
-         totalrating: actualRating,
-       },
-       { new: true }
-     );
-     res.json(finalproduct);
-   } catch (error) {
-     throw new Error(error);
-   }
- });
-

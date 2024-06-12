@@ -1,5 +1,6 @@
 const User =require('../models/UserModel.js')
 const OTP = require('../models/OtpModel.js')
+const Profile = require('../models/ProfileModel.js')
 const otpGenerator = require('otp-generator');
 const {body,validationResult}=require('express-validator');
 const bcrypt = require('bcryptjs');
@@ -14,9 +15,9 @@ const { ApiError } = require('../middlewares/ApiError.js');
 const { ApiSuccess } = require('../middlewares/apiSuccess.js');
 
 exports.signUp = async(req,res)=>{
-  let success=false;
   try{
-    const {name,email,mobile,password,cpass,otp} = req.body;
+    const {name,email,mobile,password,cpass,accountType,otp} = req.body;
+    console.log(cpass)
       let user_email = await User.findOne({email:email});
       if(user_email){
           throw new ApiError(400,"Email ALready exists")
@@ -24,49 +25,81 @@ exports.signUp = async(req,res)=>{
 
       let user_mobile = await User.findOne({mobile:mobile});
       if(user_mobile){
-        throw new ApiError(400,"Mobile Number ALready exists")
+        res.status(400).json({
+            success:false,
+            message:"Mobile Number ALready exists"
+            
+        })
       }
 
       if(password!==cpass){
-        throw new ApiError(400,"Confirm Password do not match")
+        res.status(400).json({
+            success:false,
+            message:"Confirm Password do not match"
+            
+        })
       }
 
-      const recentOtp = OTP.findOne({email:email}).sort({createdAt:-1}).limit(1);
+      const recentOtp = await OTP.findOne({email:email}).sort({createdAt:-1}).limit(1);
+      console.log(recentOtp.otp);
      if(recentOtp.length ===0){
-        throw new ApiError(400,"OTP not found")
+        res.status(400).json({
+            success:false,
+            message:"OTP not found"
+            
+        })
+        
      }
+   
      else if(recentOtp.otp !== otp){
-        throw new ApiError(400,"OTP is incorrect")
+        res.status(400).json({
+            success:false,
+            message:"OTP is incorrect"
+            
+        })
      }
 
       const secPass = await bcrypt.hash(password,10);
-      user=await User.create({
-          name,
-          email,
-          mobile,
-          password:secPass,
+      let approved = ""
+      approved === "Instructor" ? (approved = false) : (approved = true)
+      const profileDetails = await Profile.create({
+        gender: null,
+        dateOfBirth: null,
+        avatar:"",
       })
 
-      const data={
-          user:{
-              id:user.id
-          }
-      }
+      const user = await User.create({
+        name,
+        email,
+        mobile,
+        password: secPass,
+        accountType: accountType,
+        approved: approved,
+        additionalDetails: profileDetails._id,
+        image: "",
+      })
 
-      return res.status(201).json(
-        new ApiResponse(200, createdUser, "User registered Successfully")
+
+      return res.status(201).json({
+        success:true,
+        user,
+        message:"User Registered Successfully",
+      }
     )
   }catch(error){
-    throw new ApiError(400,error.message)
+    return res.status(500).json({
+        success:false,
+        message:error.message,
+    })
   }
 
 }
 
 exports.sendOTP = async(req,res)=>{
     try{
-        const email = req.body;
+        const {email} = req.body;
 
-        const user = await User.find0ne({email:email});
+        const user = await User.findOne({email:email});
         if(user){
             throw new ApiError(401,"User already exists")
         }
@@ -83,27 +116,33 @@ exports.sendOTP = async(req,res)=>{
 
         const otpPayload = {email:email,otp:otp};
 
-        const newOTP = await OTP.create(otpPayload);
 
-        return res.status(200).json(
-            new ApiResponse(200, "OTP sent successfully")
-        )
+        const newOTP = await OTP.create(otpPayload);
+        console.log(newOTP);
+
+        return res.status(200).json({
+            success:true,
+            message:"OTP sent successfully"
+    })
 
 
     }
     catch(err){
-        throw new ApiError(400,err.message)
+        res.status(500).json({
+            success:false,
+            message:err.message,
+        })
     }
 }
 
 exports.login = async (req,res)=>{
   try{
-      const {email,password,role} = req.body;
+      const {email,password} = req.body;
       if(!email||!password){
         throw new ApiError(500,"Fill details carefully")
       }
 
-      var user = await User.findOne({email:email});
+      var user = await User.findOne({email:email}).populate("additionalDetails");
 
       if(!user){
         throw new ApiError(404,"User Not Found")
@@ -125,14 +164,13 @@ exports.login = async (req,res)=>{
               expiresIn: new Date(Date.now() + 3*24*60*60*1000),
               httpOnly:true,
           }
-          res.cookie("token",accessToken,options).status(200).json(
-        new ApiResponse(
-            200, 
+          res.cookie("token",token,options).status(200).json(
             {
-                user: user, accessToken:accessToken
-            },
-            "User logged In Successfully"
-        )
+                success:true,
+                user:user,
+                accessToken:token,
+                message:"User Logged In Successfully"
+            }
     )
       }
       else{
@@ -173,21 +211,6 @@ exports.forgotPassword = async(req,res)=>{
     }
 }
 
-
-// const loginDetail =  (async (req, res) => {
-//    console.log("its's here")
-//    const {id} = req.params;
-//    console.log(id)
- 
-//    try {
-//      const getaUser = await User.findById(id);
-//      res.json({
-//        getaUser,
-//      });
-//    } catch (error) {
-//      throw new Error(error);
-//    }
-//  });
 
 //  //logout
 //  const logout = asyncHandler(async (req, res) => {

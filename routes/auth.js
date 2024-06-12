@@ -1,13 +1,13 @@
 const express=require('express');
-// const {createUser,loginUserCtrl,loginDetail,saveAddress,handleRefreshToken,logout,getaUser,deleteaUser,updatePassword,forgotPasswordToken,resetPassword,getWishlist,userCart,getUserCart,emptyCart} = require('../controller/userCtrl')
-const {fetchuser}=require('../middlewares/auth.js')
+const {auth}=require('../middlewares/auth.js')
 const User =require('../models/UserModel.js')
-const {signUp,login}=require('../controller/userCtrl.js')
-
+const {signUp,sendOTP,login,forgotPassword}=require('../controller/userCtrl.js')
 const router = express.Router();
 
 router.post('/signup',signUp);
 router.post('/login',login);
+router.post('/otp',sendOTP);
+router.post('/forgotPassword',forgotPassword);
 
 // router.post("/register", createUser);
 // router.post("/forgot-password-token", forgotPasswordToken);
