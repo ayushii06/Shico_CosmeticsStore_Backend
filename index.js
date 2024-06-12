@@ -10,7 +10,7 @@ const cartRouter = require('./routes/CartRoutes.js')
 const fileupload = require('express-fileupload')
 const { cloudinaryConnect } = require('./config/cloudinary.js')
 
-db();
+db.connect();
 
 const api = process.env.API_URL;
 //http://localhost:5050/api/shico
@@ -24,7 +24,7 @@ app.use(fileupload({
   useTempFiles:true,
   tempFileDir:'/tmp/'
 }))
-cloudinary.cloudinaryConnect();
+cloudinaryConnect();
 
 
 //middleware

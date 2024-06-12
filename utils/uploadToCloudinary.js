@@ -26,12 +26,19 @@ exports.localfileUpload = async (req, res) => {
 //   return supportedTypes.includes(type);
 // }
 
-exports.uploadFileToCloudinary=async(file,folder,quality)=>{
+exports.uploadFileToCloudinary = async (file, folder, height, quality) => {
     const options = {folder};
-    options.resource_type = 'auto';
-    if(quality) options.quality = quality;
-    return await cloudinary.uploader.upload(file.tempFilePath,options);
+    if(height) {
+        options.height = height;
+    }
+    if(quality) {
+        options.quality = quality;
+    }
+    options.resource_type = "auto";
+
+    return await cloudinary.uploader.upload(file.tempFilePath, options);
 }
+
 
 // exports.imageUpload = async (req, res) => {
 //     try {

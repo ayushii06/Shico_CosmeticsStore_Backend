@@ -10,17 +10,9 @@ exports.cloudinaryConnect = async (req, res) => {
         api_key: process.env.API_KEY,
         api_secret: process.env.API_SECRET,
         });
-        return res.status(200).json({
-            success: true,
-            message: "Cloudinary connected successfully"
         
-        });
     } catch (error) {
-        return res.status(500).json({
-            success: false,
-            message: "Internal Server Error"
-        });
-       
+        console.log(error);
 
     }
 }
