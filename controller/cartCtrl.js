@@ -1,25 +1,35 @@
 const Cart = require('../models/CartModel');
 const Item = require('../models/ProductModel');
 
-module.exports.get_cart_items = async (req,res) => {
-    const userId = req.params.id;
+exports.get_cart_items = async (req,res) => {
+    const userId = req.user.id;
+    
     try{
         let cart = await Cart.findOne({userId});
         if(cart && cart.items.length>0){
-            res.send(cart);
+            res.status(200).json({
+                success:true,
+                cart
+            });
         }
         else{
-            res.send(null);
+            res.status(200).json({
+                success:true,
+                cart:null,
+                message:'Your Cart Is Empty'
+            });
         }
     }
     catch(err){
-        console.log(err);
-        res.status(500).send("Something went wrong");
+        res.status(500).json({
+            success:false,
+            message:"Internal Server Error"
+        });
     }
 }
 
-module.exports.add_cart_item = async (req,res) => {
-    const userId = req.params.id;
+exports.add_cart_item = async (req,res) => {
+    const userId = req.user.id;
     const { productId, quantity } = req.body;
 
     try{
@@ -33,28 +43,28 @@ module.exports.add_cart_item = async (req,res) => {
 
         if(cart){
             // if cart exists for the user
-            let itemIndex = cart.items.findIndex(p => p.productId == productId);
+            let itemIndex = cart.products.findIndex(p => p.productId == productId);
 
             // Check if product exists or not
             if(itemIndex > -1)
             {
-                let productItem = cart.items[itemIndex];
-                productItem.quantity += quantity;
-                cart.items[itemIndex] = productItem;
+                let productItem = cart.products[itemIndex];
+                productItem.count += quantity;
+                cart.products[itemIndex] = productItem;
             }
             else {
-                cart.items.push({ productId, name, quantity, price });
+                cart.products.push({ productId, quantity, price });
             }
-            cart.bill += quantity*price;
+            cart.cartTotal += quantity*price;
             cart = await cart.save();
             return res.status(201).send(cart);
         }
         else{
             // no cart exists, create one
             const newCart = await Cart.create({
-                userId,
-                items: [{ productId, name, quantity, price }],
-                bill: quantity*price
+                orderby:userId,
+                products: [{ productId, name, quantity, price }],
+                cartTotal: quantity*price
             });
             return res.status(201).send(newCart);
         }       
@@ -65,8 +75,8 @@ module.exports.add_cart_item = async (req,res) => {
     }
 }
 
-module.exports.delete_item = async (req,res) => {
-    const userId = req.params.userId;
+exports.delete_item = async (req,res) => {
+    const userId = req.user.id;
     const productId = req.params.itemId;
     try{
         let cart = await Cart.findOne({userId});

@@ -1,8 +1,6 @@
 const {instance} = require('../config/rajorpay')
 const User = require('../models/UserModel');
 const Product = require('../models/ProductModel');
-const { ApiError } = require('../middlewares/ApiError');
-const { ApiSuccess } = require('../middlewares/ApiError');
 const mailSender = require('../utils/mailSender');
 const crypto = require('crypto');
 
@@ -13,16 +11,25 @@ exports.payment = async(req,res)=>{
         const {prodId,quantity} = req.body;
 
         if(!user_id){
-            throw new ApiError(400,'Please provide the id of the user')
+            res.status(400).json({
+                success:false,
+                message:'Please provide the id of the user'
+            })
         }
 
         if(!prodId){
-            throw new ApiError(400,'Please provide the id of the product')
+            res.status(400).json({
+                success:false,
+                message:'Please provide the id of the product'
+            })
         }
 
         let product = await Product.findById(prodId)
         if(!product){
-            throw new ApiError(400,'Product not found')
+            res.status(400).json({
+                success:false,
+                message:'Product Not Found'
+            })
         }
 
         const amount = product.selling_price * 100*quantity;
@@ -41,7 +48,10 @@ exports.payment = async(req,res)=>{
       
 
     } catch (error) {
-        throw new ApiError(400,error.message)
+        res.status(400).json({
+            success:false,
+            message:error.message
+        })
     }
 
     try {
@@ -61,7 +71,10 @@ exports.payment = async(req,res)=>{
             }
         )
     } catch (error) {
-        
+        res.status(400).json({
+            success:false,
+            message:error.message
+        })
     }
 }
 
@@ -99,6 +112,9 @@ exports.verifySignature = async(req,res)=>{
         })
     }
     else{
-        throw new ApiError(400,'Invalid Signature')
+        res.status(400).json({
+            success:false,
+            message:'Invalid Signature'
+        })
     }
 }

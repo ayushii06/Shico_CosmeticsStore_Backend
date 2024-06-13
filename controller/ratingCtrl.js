@@ -1,4 +1,3 @@
-const { ApiError } = require('../middlewares/ApiError.js');
 const RatingAndReview = require('../models/ratingandreview');
 const User = require('../models/UserModel.js');
 const Product = require('../models/ProductModel.js');
@@ -8,7 +7,12 @@ exports.createRatingAndReview = async (req, res) => {
     try {
         const { id } = req.user.id;
         const { rating, review, productId } = req.body;
-        if (!id) throw new ApiError(400, "User not found");
+        if (!id){
+            res.status(400).json({
+                success:false,
+                message:'User not found'
+            })
+        } 
 
         //check if user has buyed the product
         const buyer = await Product.findOne({
@@ -16,12 +20,22 @@ exports.createRatingAndReview = async (req, res) => {
             buyer: { $elemMatch: { $eq: id } }
         })
 
-        if (!buyer) throw new ApiError(400, "You have not buyed this product");
+        if (!buyer){
+            res.status(400).json({
+                success:false,
+                message:'You have not buyed this product'
+            })
+        } 
 
         const product = await Product.findById(productId);
 
         const alreadyRated = product.ratings.find((rating) => rating.createdBy.toString() === id);
-        if (alreadyRated) throw new ApiError(400, "You have already rated this product");
+        if (alreadyRated){
+            res.status(400).json({
+                success:false,
+                message:'You have already rated this product'
+            })
+        } 
 
 
         const user = await User.findById(id);
@@ -45,17 +59,25 @@ exports.createRatingAndReview = async (req, res) => {
         )
 
         await ratingAndReview.save();
-        res.status(200).json({ message: "Rating and Review added successfully" });
+        res.status(200).json({ success:true, message: "Rating and Review added successfully" });
     }
     catch (err) {
-        throw new ApiError(400, err.message)
+        res.status(400).json({
+            success:false,
+            message:err.message
+        })
     }
 }
 
 exports.updateRatingAndReview = async (req, res) => {
     try {
         const { id } = req.user.id;
-        if (!id) throw new ApiError(400, "User not found");
+        if (!id){
+            res.status(400).json({
+                success:false,
+                message:'User not found'
+            })
+        }
         const { rating, review, productId } = req.body;
 
         const ratingAndReview = await RatingAndReview.findOneAndUpdate({ createdBy: id, product: productId }, {
@@ -63,34 +85,59 @@ exports.updateRatingAndReview = async (req, res) => {
             rate: rating,
         }, { new: true });
 
-        if (!ratingAndReview) throw new ApiError(400, "Rating and Review not found");
+        if (!ratingAndReview){
+            res.status(400).json({
+                success:false,
+                message:'Rating and Review not found'
+            })
+        } 
 
         res.status(200).json({ message: "Rating and Review updated successfully" });
     } catch (error) {
-        throw new ApiError(400, error.message)
+        res.status(400).json({
+            success:false,
+            message:error.message
+        })
     }
 }
 
 exports.deleteRatingAndReview = async (req, res) => {
     try {
         const { id } = req.user.id;
-        if (!id) throw new ApiError(400, "User not found");
+        if (!id) {
+            res.status(400).json({
+                success:false,
+                message:'User not found'
+            })}
         const { productId } = req.body;
 
         const ratingAndReview = await RatingAndReview.findOneAndDelete({ createdBy: id });
 
-        if (!ratingAndReview) throw new ApiError(400, "Rating and Review not found");
+        if (!ratingAndReview){
+            res.status(400).json({
+                success:false,
+                message:'Rating and Review not found'
+            })}
+
 
         res.status(200).json({ message: "Rating and Review deleted successfully" });
     } catch (err) {
-        throw new ApiError(400, err.message)
+        res.status(400).json({
+            success:false,
+            message:err.message
+        })
     }
 }
 
 exports.avgRating = async (req, res) => {
     try {
         const { productId } = req.body;
-        if (!productId) throw new ApiError(400, "Product Id not found");
+        if (!productId){
+            res.status(400).json({
+                success:false,
+                message:'Product Id not found'
+            })
+        } 
 
         const product = await RatingAndReview.aggregate([
             {
@@ -119,7 +166,10 @@ exports.avgRating = async (req, res) => {
         res.status(200).json({ success: true, message: 'No one has reviewed it yet!', avgRating: 0, totalRating: 0 });
 
     } catch (error) {
-        throw new ApiError(400, error.message)
+        res.status(400).json({
+            success:false,
+            message:error.message
+        })
     }
 }
 
@@ -135,7 +185,12 @@ exports.getRatingAndReview = async (req, res) => {
             .sort({ rating: desc })
             .exec();
 
-        if (!data) throw new ApiError(400, "No reviews found");
+        if (!data){
+            res.status(400).json({
+                success:false,
+                message:'No reviews found'
+            })
+        }
 
         res.status(200).json({
             success: true,
@@ -143,6 +198,9 @@ exports.getRatingAndReview = async (req, res) => {
         })
     }
     catch (err) {
-        throw new ApiError(400, err.message)
+        res.status(400).json({
+            success:false,
+            message:err.message
+        })
     }
 }

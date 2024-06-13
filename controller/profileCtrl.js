@@ -1,5 +1,3 @@
-const { ApiError } = require('../middlewares/ApiError');
-const { ApiSuccess } = require('../middlewares/apiSuccess');
 const Profile = require('../models/ProfileModel');
 const User = require('../models/UserModel');
 
@@ -33,18 +31,28 @@ exports.updateProfile=async(req,res)=>{
         const user_id = req.user.id;
 
         if(!user_id){
-            throw new ApiError(400,'Please provide the id of the user')
+            res.status(500).json({
+                sucess:false,
+                message:'Please provide the id of the user'
+            })
+           
         }
 
         const user = await User.findById(user_id)
         if(!user){
-            throw new ApiError(400,'User not found')
+            res.status(500).json({
+                sucess:false,
+                message:'User not found'
+            })
         }
 
         const profile_id = user.additionalDetails;
         const profile = await Profile.findById(profile_id)
         if(!profile){
-            throw new ApiError(400,'Profile not found')
+            res.status(500).json({
+                sucess:false,
+                message:'Profile not found'
+            })
         }
         profile.age = age;
         profile.dob = dob;
@@ -52,10 +60,15 @@ exports.updateProfile=async(req,res)=>{
 
         await profile.save();
         
-        res.status(200).json(new ApiSuccess(200,'Profile updated successfully'))
+        res.status(200).json({
+            success:true,
+            message:'Profile updated successfully'})
 
     } catch (error) {
-        throw new ApiError(400, error.message)
+        res.status(400).json({
+            success:false,
+            message:error.message
+        })
     }
 }
 
@@ -64,20 +77,33 @@ exports.deleteAccount = async(req,res)=>{
     try {
         const id = req.user.id;
         if(!id){
-            throw new ApiError(400,'Please provide the id of the user')
+            res.status(500).json({
+                sucess:false,
+                message:'Please provide the id of the user'
+            })
+           
         }
         const user = await User.findById(id)
         if(!user){
-            throw new ApiError(400,'User not found')
+            res.status(500).json({
+                sucess:false,
+                message:'User not found'
+            })
         }
     
         const profile_id = user.additionalDetails;
         await Profile.findByIdAndDelete(profile_id)
     
         await User.findByIdAndDelete(id)
-        res.status(200).json(new ApiSuccess(200,'Account deleted successfully'))
+        res.status(200).json({
+            success:true,
+            message:'Account deleted successfully'
+        })
     } catch (error) {
-        throw new ApiError(400, error.message)
+        res.status(500).json({
+            sucess:false,
+            message:error.message
+        })
         
     }
 }
@@ -86,14 +112,23 @@ exports.getProfile = async(req,res)=>{
     const id = req.user.id;
 
     if(!id){
-        throw new ApiError(400,'Please provide the id of the user')
+        res.status(500).json({
+            sucess:false,
+            message:'Please provide the id of the user'
+        })
     }
 
     const user = await User.findById(id)
     if(!user){
-        throw new ApiError(400,'User not found')
+        res.status(500).json({
+            sucess:false,
+            message:'User not found'
+        })
     }
 
     const data = await User.findById(id).populate('additionalDetails').exec();
-    res.status(200).json(new ApiSuccess(200,'Profile retrieved successfully',data))
-}
+    res.status(200).json({
+        sucess:true,
+        data,
+        message:'Profile retrieved successfully'
+    })}

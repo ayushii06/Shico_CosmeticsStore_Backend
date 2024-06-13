@@ -1,4 +1,3 @@
-const { ApiError } = require('../middlewares/ApiError');
 const Category = require('../models/CategoryModel');
 
 exports.createCategory = async(req,res)=>{
@@ -53,15 +52,24 @@ exports.categoryProducts = async(req,res)=>{
         }).exec();
 
         if(!category){
-            throw new ApiError(400,"Category not found");
+            res.status(400).json({
+                success:false,
+                message:'Category Not Found'
+            })
         }
 
         //get all products in the category
         const products = category.products;
-        res.status(200).json({products});
+        res.status(200).json({
+            success:true,
+            products
+        });
 
     }catch(err){
-        throw new ApiError(400,err.message);
+        res.status(400).json({
+            success:false,
+            message:err.message
+        })
     }
 }
 
@@ -74,9 +82,15 @@ exports.topSellingProducts = async(req,res)=>{
             options:{limit:5,sort:{avgRating:-1}}
         }).exec();
 
-        res.status(200).json({products});
+        res.status(200).json({
+            success:true,
+            products
+        });
         
     } catch (error) {
-        throw new ApiError(400,error.message);
+        res.status(400).json({
+            success:true,
+            message:error.message
+        })
     }
 }

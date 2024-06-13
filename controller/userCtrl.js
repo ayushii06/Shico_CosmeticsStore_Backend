@@ -11,8 +11,6 @@ const { generateToken } = require("../config/jwtToken");
 const validateMongoDbId = require("../utils/validateMongodbId");
 const {generateRefreshToken} = require("../config/refreshtoken.js")
 const crypto = require("crypto");
-const { ApiError } = require('../middlewares/ApiError.js');
-const { ApiSuccess } = require('../middlewares/apiSuccess.js');
 
 exports.signUp = async(req,res)=>{
   try{
@@ -20,7 +18,10 @@ exports.signUp = async(req,res)=>{
     console.log(cpass)
       let user_email = await User.findOne({email:email});
       if(user_email){
-          throw new ApiError(400,"Email ALready exists")
+        res.status(400).json({
+            success:false,
+            message:'Email ALready exists'
+        })
       }
 
       let user_mobile = await User.findOne({mobile:mobile});
@@ -101,7 +102,10 @@ exports.sendOTP = async(req,res)=>{
 
         const user = await User.findOne({email:email});
         if(user){
-            throw new ApiError(401,"User already exists")
+            res.status(400).json({
+                success:false,
+                message:'User already exists'
+            })
         }
 
         const otp = otpGenerator.generate(6,{upperCase:false,specialChars:false,alphabets:false});
@@ -139,13 +143,19 @@ exports.login = async (req,res)=>{
   try{
       const {email,password} = req.body;
       if(!email||!password){
-        throw new ApiError(500,"Fill details carefully")
+        res.status(400).json({
+            success:false,
+            message:'Fill details carefully'
+        })
       }
 
       var user = await User.findOne({email:email}).populate("additionalDetails");
 
       if(!user){
-        throw new ApiError(404,"User Not Found")
+        res.status(400).json({
+            success:false,
+            message:"User Not Found"
+        })
       }
 
       const payload = {
@@ -193,21 +203,33 @@ exports.forgotPassword = async(req,res)=>{
         
         const {email,token,oldPassword , newPassword , newConfirmPassword} = req.body;
         if(!email||!oldPassword||!newPassword||!newConfirmPassword){
-            throw new ApiError(400,"Fill details carefully")
+            res.status(400).json({
+                success:false,
+                message:'Fill details carefully'
+            })
         }
 
         if (newPassword !== newConfirmPassword) {
-            throw new ApiError(400, "Passwords do not match");
+            res.status(400).json({
+                success:false,
+                message:'Passwords do not match'
+            })
         }
 
         if (oldPassword === newPassword) {
-            throw new ApiError(400, "Old password and new password should not be same");
+            res.status(400).json({
+                success:false,
+                message:'Old password and new password should not be same'
+            })
         }
 
 
 
     }catch(err){
-        throw new ApiError(400,err.message)
+        res.status(400).json({
+            success:false,
+            message:err.message
+        })
     }
 }
 

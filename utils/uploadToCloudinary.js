@@ -1,5 +1,3 @@
-const { ApiError } = require("../middlewares/ApiError");
-const { ApiSuccess } = require("../middlewares/apiSuccess");
 const file = require("../models/File");
 const cloudinary = require("cloudinary").v2;
 const Product = require("../models/ProductModel");
@@ -12,13 +10,22 @@ exports.localfileUpload = async (req, res) => {
 
     file.mv(path, (err) => {
       if (err) {
-      throw new ApiError(500, "Error in uploading file");
+        res.status(500).json({
+          success:false,
+          message:'Error in uploading file'
+      })
       }
     });
 
-    return res.status(200).json(new ApiSuccess(200, "File Uploaded Successfully"));
+    return res.status(200).json({
+      success:true,
+      message:'File Uploaded Successfully'
+    });
   } catch (error) {
-    throw new ApiError(500, error.message);
+    res.status(400).json({
+      success:false,
+      message:error.message
+  })
   }
 }
 

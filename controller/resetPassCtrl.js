@@ -1,5 +1,3 @@
-const { ApiSuccess } = require("../middlewares/apiSuccess");
-const { ApiError } = require("../middlewares/ApiError");
 const User = require("../models/UserModel");
 const mailSender = require("../utils/mailSender");
 
@@ -35,22 +33,34 @@ exports.generateResetToken = async (req,res)=>{
              
         )
 
-        return res.status(200).json(
-            new ApiResponse(200, "Password Reset Link Sent Successfully")
+        return res.status(200).json({
+            success:true,
+            message:"Password Reset Link Sent Successfully"
+        }
     )
     } catch (error) {
-        throw new ApiError(500,error.message);
+        return res.status(500).json({
+            success:false,
+            message:error.message
+        })
     }
 }
 
 exports.resetPass = async(req,res)=>{
     const {token , password, confirmPassword} = req.body;
     if(!token || !password || !confirmPassword){
-        throw new ApiError(400,'All fields are required');
+        res.status(400).json({
+            success:false,
+            message:"All fields are required"
+        })
+        
     }
 
     if(password !== confirmPassword){
-        throw new ApiError(400,'Passwords do not match');
+        res.status(400).json({
+            success:false,
+            message:"Passwords do not match"
+        })
     }
 
     let user = await User.findOne({
@@ -58,11 +68,17 @@ exports.resetPass = async(req,res)=>{
     })
 
     if(!user){
-        throw new ApiError(400,'Token is invalid or expired');
+        res.status(400).json({
+            success:false,
+            message:'Token is invalid or expired'
+        })
     }
 
     if(user.passwordResetExpires < Date.now()){
-        throw new ApiError(400,'Token is expired');
+        res.status(400).json({
+            success:false,
+            message:'Token is expired'
+        })
     }
 
     const hashedPassword = await bcrypt.hash(password,10);

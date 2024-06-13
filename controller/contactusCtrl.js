@@ -1,4 +1,4 @@
-const { ApiError } = require('../middlewares/ApiError');
+
 const ContactUs = require('../models/ContactUsModel');
 const mailSender = require('../utils/mailSender')
 
@@ -14,6 +14,9 @@ exports.getMessage = async(req,res)=>{
 
         
     } catch (error) {
-        throw new ApiError(400,error.message);
+        res.status(400).json({
+            success:false,
+            message:error.message
+        })
     }
 }

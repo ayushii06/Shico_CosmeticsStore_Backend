@@ -6,8 +6,6 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const asyncHandler = require('express-async-handler');
 const { getWishlist } = require('./userCtrl.js');
-const { ApiError } = require('../middlewares/ApiError.js');
-const { ApiSuccess } = require('../middlewares/ApiError.js');
 require('dotenv').config();
 const {uploadFileToCloudinary}=require('../utils/uploadToCloudinary.js');
 const Category = require('../models/CategoryModel.js');
@@ -28,11 +26,18 @@ exports.createProduct =async (req, res) => {
     const imghoversrcType = imghoversrc.name.split('.')[1];
     
   if(!supportedTypes.includes(imgsrcType)){
-            throw new ApiError(400,'File type not supported');
+    res.status(400).json({
+      success:false,
+      message:"File type not supported"
+    })
+  
   }
 
   if(!supportedTypes.includes(imghoversrcType)){
-    throw new ApiError(400,'File type not supported');
+    res.status(400).json({
+      success:false,
+      message:"File type not supported"
+    })
   }
 
     const imgsrcresponse = await uploadFileToCloudinary(imgsrc,process.env.CLOUDINARY_FOLDER);
@@ -89,10 +94,16 @@ exports.updateProduct = async(req,res)=>{
         runValidators:true
       }
     )
-    
-    res.status(200).json(new ApiSuccess(200,"Product updated successfully"))
+    res.status(200).json({
+      success:true,
+      message:"Product updated successfully"
+    })
   } catch (error) {
-    throw new ApiError(400,error.message)
+    res.status(400).json({
+      success:false,
+      error:error.message,
+      message:"File type not supported"
+    })
   }
 }
 
@@ -103,14 +114,23 @@ exports.deleteProduct = async (req, res) => {
     const product = await ProductModel.findByIdAndDelete(product_id)
 
     if(!product){
-      throw new ApiError(400,"Product not found")
+      res.status(400).json({
+        success:false,
+        message:"Product Not Found"
+      })
     }
 
-    res.status(200).json(new ApiSuccess(200,"Product deleted successfully"))
+    res.status(200).json({
+      success:true,
+      message:"Product deleted successfully"
+    })
 
   }
   catch(err){
-    throw new ApiError(400,err.message)
+    res.status(400).json({
+      success:false,
+      error:error.message,
+    })
   }
 }
 
@@ -118,10 +138,24 @@ exports.deleteProduct = async (req, res) => {
 exports.getallProducts = async (req,res) =>{
    try {
       const products = await ProductModel.find()
-      res.send(products)
+      if(!products){
+        res.status(400).json({
+          success:false,
+          message:"no products found"
+        })
+      }
+      res.status(200).json({
+        success:true,
+        products
+      })
+
    } catch (error) {
+    res.status(500).json({
+      success:false,
+      error:error.message,
+      message:"Internal Server Error"
+    })
        console.error(error.message);
-         res.status(500).send('Internal Server Error');
    }
    
 }
@@ -181,11 +215,18 @@ exports.fetchAllData = async(req,res)=>{
     const product = await ProductModel.findById(prodId).populate("ratings").exec(); 
 
     if(!product){
-      throw new ApiError(400,"Product not found")
+      res.status(400).json({
+        success:false,
+        message:"Product not found"
+      })
     }
   }
   catch(err){
-    throw new ApiError(400,err.message)
+    res.status(400).json({
+      success:false,
+      error:err.message,
+      message:"Product not found"
+    })
   }
 }
 
