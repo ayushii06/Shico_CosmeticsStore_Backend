@@ -8,6 +8,7 @@ var ratingSchema = new mongoose.Schema({
     rate:{
         type:Number,
         required:true,
+        
     },
     product:{
         type:mongoose.Schema.Types.ObjectId,

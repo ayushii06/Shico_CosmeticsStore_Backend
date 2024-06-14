@@ -15,14 +15,16 @@ exports.createProduct =async (req, res) => {
 
 
    try{
-    const {product_name,desc,selling_price,market_price,category}=req.body;
+    const {product_name,desc,stock,selling_price,market_price,category}=req.body;
    let success=false;
 
     const imgsrc = req.files.imgsrc;
+    
     const imghoversrc = req.files.imghoversrc;
 
     const supportedTypes = ['png','jpg','jpeg','gif','webp',];
     const imgsrcType = imgsrc.name.split('.')[1];
+  
     const imghoversrcType = imghoversrc.name.split('.')[1];
     
   if(!supportedTypes.includes(imgsrcType)){
@@ -46,6 +48,7 @@ exports.createProduct =async (req, res) => {
    product = await ProductModel.create({
       product_name,
       desc,
+      stock,
       selling_price,
       market_price,
       category,
@@ -53,26 +56,18 @@ exports.createProduct =async (req, res) => {
       imghoversrc:imghoversrcresponse.secure_url,
    });
 
+
    //push the product id to the category
-    const Category = await Category.findById(category);
-    Category.products.push(product._id);
-    await Category.save();
+    // const Category = await Category.findById(category);
+    // Category.products.push(product._id);
+    // await Category.save();
 
   
-   const data={
-      product:{
-         id:product.id
-      }
-   }
-
-   success=true;
-   const authtoken=jwt.sign(data,process.env.JWT_SECRET);
-   console.log(authtoken);
-   
-   res.json({success,"authtoken":authtoken});
+  
+   res.json({success:true,product});
    } catch(error) {    
       console.error(error.message);
-      res.status(500).json({success,error:'Internal Server Error'});
+      res.status(500).json({success:false,error:'Internal Server Error'});
 
    }};
 
@@ -212,7 +207,7 @@ exports.fetchAllData = async(req,res)=>{
   try{
     const {prodId} = req.body;
 
-    const product = await ProductModel.findById(prodId).populate("ratings").exec(); 
+    const product = await ProductModel.findOne({_id: prodId}).populate('ratings').exec(); 
 
     if(!product){
       res.status(400).json({
@@ -220,6 +215,12 @@ exports.fetchAllData = async(req,res)=>{
         message:"Product not found"
       })
     }
+
+    res.status(200).json({
+      success:true,
+      product,
+      message:"Details fetched successfully"
+    })
   }
   catch(err){
     res.status(400).json({

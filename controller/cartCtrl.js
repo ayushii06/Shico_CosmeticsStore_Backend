@@ -1,12 +1,14 @@
 const Cart = require('../models/CartModel');
 const Item = require('../models/ProductModel');
+const User = require('../models/UserModel');
 
 exports.get_cart_items = async (req,res) => {
     const userId = req.user.id;
     
     try{
-        let cart = await Cart.findOne({userId});
-        if(cart && cart.items.length>0){
+        let cart = await Cart.find({orderby:userId});
+        console.log(cart)
+        if(cart && cart.length>0){
             res.status(200).json({
                 success:true,
                 cart
@@ -57,6 +59,7 @@ exports.add_cart_item = async (req,res) => {
             }
             cart.cartTotal += quantity*price;
             cart = await cart.save();
+           
             return res.status(201).send(cart);
         }
         else{
@@ -65,7 +68,20 @@ exports.add_cart_item = async (req,res) => {
                 orderby:userId,
                 products: [{ productId, name, quantity, price }],
                 cartTotal: quantity*price
-            });
+
+            })
+            User.findByIdAndUpdate(userId, {
+                $push: {
+                    cart: newCart._id,
+                }
+            },
+                {
+                    new: true,
+                }
+    
+            )
+
+
             return res.status(201).send(newCart);
         }       
     }
