@@ -41,25 +41,6 @@ exports.signUp = async(req,res)=>{
         })
       }
 
-      const recentOtp = await OTP.findOne({email:email}).sort({createdAt:-1}).limit(1);
-      console.log(recentOtp.otp);
-     if(recentOtp.length ===0){
-        res.status(400).json({
-            success:false,
-            message:"OTP not found"
-            
-        })
-        
-     }
-   
-     else if(recentOtp.otp !== otp){
-        res.status(400).json({
-            success:false,
-            message:"OTP is incorrect"
-            
-        })
-     }
-
       const secPass = await bcrypt.hash(password,10);
       let approved = ""
       approved === "Instructor" ? (approved = false) : (approved = true)
@@ -135,6 +116,40 @@ exports.sendOTP = async(req,res)=>{
         res.status(500).json({
             success:false,
             message:err.message,
+        })
+    }
+}
+
+exports.verifyOTP = async(req,res)=>{
+    try{
+        const recentOtp = await OTP.findOne({email:email}).sort({createdAt:-1}).limit(1);
+      console.log(recentOtp.otp);
+     if(recentOtp.length ===0){
+        res.status(400).json({
+            success:false,
+            message:"OTP not found"
+            
+        })
+        
+     }
+   
+     else if(recentOtp.otp !== otp){
+        res.status(400).json({
+            success:false,
+            message:"OTP is incorrect"
+            
+        })
+
+        res.status(200).json({
+            success:true,
+            message:"OTP is correct"
+        })
+     }
+
+    }catch(err){
+        res.status(500).json({
+            success:false,
+            message:err.message
         })
     }
 }

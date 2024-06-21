@@ -1,12 +1,13 @@
 const express=require('express');
 const {auth}=require('../middlewares/auth.js')
 const User =require('../models/UserModel.js')
-const {signUp,sendOTP,login,forgotPassword}=require('../controller/userCtrl.js')
+const {signUp,sendOTP,verifyOTP,login,forgotPassword}=require('../controller/userCtrl.js');
 const router = express.Router();
 
 router.post('/signup',signUp);
 router.post('/login',login);
 router.post('/otp',sendOTP);
+router.post('/verifyotp',verifyOTP);
 router.post('/forgotPassword',forgotPassword);
 
 // router.post("/register", createUser);
