@@ -14,7 +14,7 @@ const crypto = require("crypto");
 
 exports.signUp = async(req,res)=>{
   try{
-    const {name,email,mobile,password,cpass,accountType,otp} = req.body;
+    const {name,email,mobile,password,cpass,accountType} = req.body;
     console.log(cpass)
       let user_email = await User.findOne({email:email});
       if(user_email){
@@ -88,13 +88,16 @@ exports.sendOTP = async(req,res)=>{
                 message:'User already exists'
             })
         }
-
-        const otp = otpGenerator.generate(6,{upperCase:false,specialChars:false,alphabets:false});
-
+        let otp = '';
+        for (let i = 0; i < 4; i++) {
+          otp += Math.floor(Math.random() * 10); // Generate a random digit
+        }
         const alreadyExists = await OTP.findOne({otp:otp});
 
         if(alreadyExists){
-            const otp = otpGenerator.generate(6,{upperCase:false,specialChars:false,alphabets:false});
+            for (let i = 0; i < length; i++) {
+                otp += Math.floor(Math.random() * 10); // Generate a random digit
+              }
 
             const alreadyExists = await OTP.findOne({otp:otp});
         }
@@ -122,10 +125,11 @@ exports.sendOTP = async(req,res)=>{
 
 exports.verifyOTP = async(req,res)=>{
     try{
+        const {otp,email} = req.body;
         const recentOtp = await OTP.findOne({email:email}).sort({createdAt:-1}).limit(1);
-      console.log(recentOtp.otp);
-     if(recentOtp.length ===0){
-        res.status(400).json({
+      console.log(recentOtp);
+     if(!recentOtp){
+        return res.status(400).json({
             success:false,
             message:"OTP not found"
             
@@ -133,18 +137,18 @@ exports.verifyOTP = async(req,res)=>{
         
      }
    
-     else if(recentOtp.otp !== otp){
-        res.status(400).json({
+     if(recentOtp.otp !== otp){
+        return res.status(400).json({
             success:false,
             message:"OTP is incorrect"
             
-        })
+        })}
 
-        res.status(200).json({
+    return res.status(200).json({
             success:true,
             message:"OTP is correct"
         })
-     }
+     
 
     }catch(err){
         res.status(500).json({
