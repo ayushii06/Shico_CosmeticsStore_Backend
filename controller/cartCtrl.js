@@ -6,7 +6,11 @@ exports.get_cart_items = async (req,res) => {
     const userId = req.user.id;
     
     try{
-        let cart = await Cart.find({orderby:userId});
+        let cart = await Cart.find({orderby:userId}).populate({
+            path: 'products',
+            select: 'product_name price'
+        }).exec();
+      
         console.log(cart)
         if(cart && cart.length>0){
             res.status(200).json({
@@ -60,7 +64,12 @@ exports.add_cart_item = async (req,res) => {
             cart.cartTotal += quantity*price;
             cart = await cart.save();
            
-            return res.status(201).send(cart);
+            return res.json({
+                success: true,
+                message: 'Product added to cart successfully',
+                cart
+            
+            })
         }
         else{
             // no cart exists, create one
@@ -82,7 +91,12 @@ exports.add_cart_item = async (req,res) => {
             )
 
 
-            return res.status(201).send(newCart);
+            return res.json({
+                success: true,
+                message: 'Product added to cart successfully',
+                newCart
+            
+            })
         }       
     }
     catch (err) {
