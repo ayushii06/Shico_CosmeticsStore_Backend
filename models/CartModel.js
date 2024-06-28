@@ -9,6 +9,8 @@ var cartSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "Product",
         },
+        productName: String,
+        imgsrc: String,
         count: Number,
         price: Number,
       },
