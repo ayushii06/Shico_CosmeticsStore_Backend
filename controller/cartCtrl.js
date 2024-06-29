@@ -7,7 +7,10 @@ exports.get_cart_items = async (req,res) => {
     
     try{
         let cart = await Cart.find({orderby:userId}).populate(
-                   "products.product"
+                   {
+                    path: 'Product',
+                    populate:'products'
+                   }
         );
       
         console.log(cart)
