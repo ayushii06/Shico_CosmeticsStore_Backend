@@ -7,13 +7,9 @@ exports.get_cart_items = async (req,res) => {
     
     try{
         let cart = await Cart.find({orderby:userId}).populate(
-                   {
-                    path: 'Product',
-                    populate:'products'
-                   }
+            'products.product'
         );
       
-        console.log(cart)
         if(cart && cart.length>0){
             res.status(200).json({
                 success:true,
@@ -41,13 +37,14 @@ exports.add_cart_item = async (req,res) => {
     const { productId, quantity } = req.body;
 
     try{
-        let cart = await Cart.findOne({userId});
+        let cart = await Cart.findOne({orderby:userId});
         let item = await Item.findOne({_id: productId});
         if(!item){
             res.status(404).send('Item not found!')
         }
         const price = item.selling_price;
-        const name = item.product_name;
+        const productName = item.product_name;
+      
         const imgsrc = item.imgsrc;
 
         if(cart){
@@ -62,7 +59,7 @@ exports.add_cart_item = async (req,res) => {
                 cart.products[itemIndex] = productItem;
             }
             else {
-                cart.products.push({ productId, name , imgsrc, quantity, price });
+                cart.products.push({ productId, productName , imgsrc, quantity, price });
             }
             cart.cartTotal += quantity*price;
             cart = await cart.save();
@@ -77,7 +74,7 @@ exports.add_cart_item = async (req,res) => {
             // no cart exists, create one
             const newCart = await Cart.create({
                 orderby:userId,
-                products: [{ productId, name, imgsrc, quantity, price }],
+                products: [{ productId, productName, imgsrc, quantity, price }],
                 cartTotal: quantity*price
 
             })
@@ -110,17 +107,24 @@ exports.add_cart_item = async (req,res) => {
 exports.delete_item = async (req,res) => {
     const userId = req.user.id;
     const productId = req.params.itemId;
+    console.log(productId)
     try{
-        let cart = await Cart.findOne({userId});
-        let itemIndex = cart.items.findIndex(p => p.productId == productId);
+        let cart = await Cart.findOne({orderby:userId});  
+        let itemIndex = cart.products.findIndex(p => p._id == productId);
+        console.log(itemIndex)
         if(itemIndex > -1)
         {
-            let productItem = cart.items[itemIndex];
+            let productItem = cart.products[itemIndex];
             cart.bill -= productItem.quantity*productItem.price;
-            cart.items.splice(itemIndex,1);
+            cart.products.splice(itemIndex,1);
         }
         cart = await cart.save();
-        return res.status(201).send(cart);
+        return res.status(201).json({
+            success: true,
+            message: 'Item removed from cart successfully',
+            cart
+        
+        });
     }
     catch (err) {
         console.log(err);

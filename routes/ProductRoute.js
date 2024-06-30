@@ -8,7 +8,7 @@ const router = express.Router();
 router.post("/add",auth,isSeller,createProduct);
 router.put("/update",auth,isSeller,updateProduct)
 router.delete("/delete/:product_id",auth,isSeller,deleteProduct)
-router.get("/getallProducts",auth,getallProducts)
+router.get("/getallProducts",getallProducts)
 router.get("/fetchAllData",auth,isSeller,fetchAllData)
 
 // router.put("/wishlist", fetchuser, addToWishlist);
