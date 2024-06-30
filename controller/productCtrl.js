@@ -206,28 +206,25 @@ exports.getaProduct = asyncHandler(async (req, res) => {
 exports.fetchAllData = async(req,res)=>{
   try{
     const {prodId} = req.body;
-
     const product = await ProductModel.findOne({_id: prodId}).populate('ratings').exec(); 
-
+    
     if(!product){
-      res.status(400).json({
+      return res.status(400).json({
         success:false,
         message:"Product not found"
       })
     }
 
-    res.status(200).json({
+    return res.status(200).json({
       success:true,
       product,
       message:"Details fetched successfully"
     })
   }
   catch(err){
-    res.status(400).json({
-      success:false,
-      error:err.message,
-      message:"Product not found"
-    })
+    console.error(err.message);
+   return res.status(500).json({success:false,error:'Internal Server Error'});
+
   }
 }
 
