@@ -6,6 +6,7 @@ const db=require('./config/connection.js');
 const authRouter = require('./routes/auth.js')
 const cors = require('cors')
 const productRouter = require('./routes/ProductRoute.js')
+const profileRouter = require('./routes/ProfileRoute.js')
 const cartRouter = require('./routes/CartRoutes.js')
 const fileupload = require('express-fileupload')
 const { cloudinaryConnect } = require('./config/cloudinary.js')
@@ -33,6 +34,7 @@ app.use(bodyParser.urlencoded({extended:false}));
 app.use(`${api}/user`,authRouter)
 app.use(`${api}/product`,productRouter)
 app.use(`${api}/cart`,cartRouter)
+app.use(`${api}/profile`,profileRouter)
 
 
 app.use(notFound);

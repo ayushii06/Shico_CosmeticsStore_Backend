@@ -10,6 +10,9 @@ var profileSchema = new mongoose.Schema({
     gender:{
         type:String,
     },
+    address:{
+        type:String,
+    }
 
 });
 

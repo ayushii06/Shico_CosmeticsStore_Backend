@@ -32,7 +32,7 @@ exports.updateProfile=async(req,res)=>{
 
         if(!user_id){
             res.status(500).json({
-                sucess:false,
+                success:false,
                 message:'Please provide the id of the user'
             })
            
@@ -41,7 +41,7 @@ exports.updateProfile=async(req,res)=>{
         const user = await User.findById(user_id)
         if(!user){
             res.status(500).json({
-                sucess:false,
+                success:false,
                 message:'User not found'
             })
         }
@@ -50,7 +50,7 @@ exports.updateProfile=async(req,res)=>{
         const profile = await Profile.findById(profile_id)
         if(!profile){
             res.status(500).json({
-                sucess:false,
+                success:false,
                 message:'Profile not found'
             })
         }
@@ -78,7 +78,7 @@ exports.deleteAccount = async(req,res)=>{
         const id = req.user.id;
         if(!id){
             res.status(500).json({
-                sucess:false,
+                success:false,
                 message:'Please provide the id of the user'
             })
            
@@ -86,7 +86,7 @@ exports.deleteAccount = async(req,res)=>{
         const user = await User.findById(id)
         if(!user){
             res.status(500).json({
-                sucess:false,
+                success:false,
                 message:'User not found'
             })
         }
@@ -101,7 +101,7 @@ exports.deleteAccount = async(req,res)=>{
         })
     } catch (error) {
         res.status(500).json({
-            sucess:false,
+            success:false,
             message:error.message
         })
         
@@ -113,7 +113,7 @@ exports.getProfile = async(req,res)=>{
 
     if(!id){
         res.status(500).json({
-            sucess:false,
+            success:false,
             message:'Please provide the id of the user'
         })
     }
@@ -121,14 +121,14 @@ exports.getProfile = async(req,res)=>{
     const user = await User.findById(id)
     if(!user){
         res.status(500).json({
-            sucess:false,
+            success:false,
             message:'User not found'
         })
     }
 
     const data = await User.findById(id).populate('additionalDetails').exec();
     res.status(200).json({
-        sucess:true,
+        success:true,
         data,
         message:'Profile retrieved successfully'
     })}
