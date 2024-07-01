@@ -158,6 +158,7 @@ exports.getallProducts = async (req,res) =>{
 //the customer finds a product by id (filtering, sorting, limiting fields, pagination)
 exports.getaProduct = asyncHandler(async (req, res) => {
    try {
+    console.log(req.params.id)
      // Filtering
      const queryObj = { ...req.query };
      const excludeFields = ["page", "sort", "limit", "fields"];
