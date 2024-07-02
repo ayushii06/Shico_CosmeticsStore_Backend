@@ -43,10 +43,10 @@ exports.productBuyed = async (req, res) => {
 }
 exports.createRatingAndReview = async (req, res) => {
     try {
-        const { id } = req.user.id;
+        const  id  = req.user.id;
         const { rating, review, productId } = req.body;
         if (!id){
-            res.status(400).json({
+            return res.status(400).json({
                 success:false,
                 message:'User not found'
             })
@@ -58,8 +58,10 @@ exports.createRatingAndReview = async (req, res) => {
             buyer: { $elemMatch: { $eq: id } }
         })
 
+
+
         if (!buyer){
-            res.status(400).json({
+            return res.status(400).json({
                 success:false,
                 message:'You have not buyed this product'
             })
@@ -69,7 +71,7 @@ exports.createRatingAndReview = async (req, res) => {
 
         const alreadyRated = product.ratings.find((rating) => rating.createdBy.toString() === id);
         if (alreadyRated){
-            res.status(400).json({
+            return res.status(400).json({
                 success:false,
                 message:'You have already rated this product'
             })
@@ -84,7 +86,7 @@ exports.createRatingAndReview = async (req, res) => {
             product: productId,
         });
 
-        Product.findByIdAndUpdate(productId, {
+        await Product.findByIdAndUpdate(productId, {
             $push: {
                 ratings: ratingAndReview._id,
             }
@@ -92,15 +94,13 @@ exports.createRatingAndReview = async (req, res) => {
             {
                 new: true,
             }
-
-
         )
 
         await ratingAndReview.save();
-        res.status(200).json({ success:true, message: "Rating and Review added successfully" });
+        return res.status(200).json({ success:true, message: "Rating and Review added successfully" });
     }
     catch (err) {
-        res.status(400).json({
+        return res.status(400).json({
             success:false,
             message:err.message
         })
@@ -111,7 +111,7 @@ exports.updateRatingAndReview = async (req, res) => {
     try {
         const { id } = req.user.id;
         if (!id){
-            res.status(400).json({
+          return res.status(400).json({
                 success:false,
                 message:'User not found'
             })
@@ -124,15 +124,15 @@ exports.updateRatingAndReview = async (req, res) => {
         }, { new: true });
 
         if (!ratingAndReview){
-            res.status(400).json({
+          return res.status(400).json({
                 success:false,
                 message:'Rating and Review not found'
             })
         } 
 
-        res.status(200).json({ message: "Rating and Review updated successfully" });
+      return res.status(200).json({ message: "Rating and Review updated successfully" });
     } catch (error) {
-        res.status(400).json({
+      return res.status(400).json({
             success:false,
             message:error.message
         })
@@ -143,7 +143,7 @@ exports.deleteRatingAndReview = async (req, res) => {
     try {
         const { id } = req.user.id;
         if (!id) {
-            res.status(400).json({
+          return res.status(400).json({
                 success:false,
                 message:'User not found'
             })}
@@ -152,15 +152,15 @@ exports.deleteRatingAndReview = async (req, res) => {
         const ratingAndReview = await RatingAndReview.findOneAndDelete({ createdBy: id });
 
         if (!ratingAndReview){
-            res.status(400).json({
+          return res.status(400).json({
                 success:false,
                 message:'Rating and Review not found'
             })}
 
 
-        res.status(200).json({ message: "Rating and Review deleted successfully" });
+      return res.status(200).json({ message: "Rating and Review deleted successfully" });
     } catch (err) {
-        res.status(400).json({
+      return res.status(400).json({
             success:false,
             message:err.message
         })
@@ -171,7 +171,7 @@ exports.avgRating = async (req, res) => {
     try {
         const { productId } = req.body;
         if (!productId){
-            res.status(400).json({
+          return res.status(400).json({
                 success:false,
                 message:'Product Id not found'
             })
@@ -201,10 +201,10 @@ exports.avgRating = async (req, res) => {
             })
         }
 
-        res.status(200).json({ success: true, message: 'No one has reviewed it yet!', avgRating: 0, totalRating: 0 });
+      return res.status(200).json({ success: true, message: 'No one has reviewed it yet!', avgRating: 0, totalRating: 0 });
 
     } catch (error) {
-        res.status(400).json({
+      return res.status(400).json({
             success:false,
             message:error.message
         })
@@ -215,28 +215,26 @@ exports.getRatingAndReview = async (req, res) => {
     try {
         const productId = req.params.productId;
 
-        const data = RatingAndReview.find({ product: productId })
+        const data = RatingAndReview.findById({ product: productId })
             .populate({
                 path: 'createdBy',
                 select: 'name'
-            })
-            .sort({ rating: desc })
-            .exec();
+            }).exec();
 
         if (!data){
-            res.status(400).json({
+          return res.status(400).json({
                 success:false,
                 message:'No reviews found'
             })
         }
 
-        res.status(200).json({
+      return res.status(200).json({
             success: true,
             data: data,
         })
     }
     catch (err) {
-        res.status(400).json({
+      return res.status(400).json({
             success:false,
             message:err.message
         })

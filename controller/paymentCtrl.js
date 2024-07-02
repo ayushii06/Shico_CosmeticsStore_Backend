@@ -46,17 +46,9 @@ exports.payment = async(req,res)=>{
 
         }
       
-
-    } catch (error) {
-        res.status(400).json({
-            success:false,
-            message:error.message
-        })
-    }
-
-    try {
-        const paymentResponse = await instance.orders.create(options)
-        console.log(paymentResponse)
+    
+        // const paymentResponse = await instance.orders.create(options)
+        // console.log(paymentResponse)
 
         product_update = await Product.findByIdAndUpdate(prodId,{
             $inc : {stock : -quantity},
@@ -73,9 +65,9 @@ exports.payment = async(req,res)=>{
                 productDesc : product.desc,
                 img : product.imgsrc,
                 qty : quantity,
-                orderId : paymentResponse.id,
-                currency:paymentResponse.currency,
-                amount: paymentResponse.amount,
+                // orderId : paymentResponse.id,
+                // currency:paymentResponse.currency,
+                // amount: paymentResponse.amount,
             }
         )
     } catch (error) {

@@ -9,6 +9,7 @@ const productRouter = require('./routes/ProductRoute.js')
 const profileRouter = require('./routes/ProfileRoute.js')
 const cartRouter = require('./routes/CartRoutes.js')
 const reviewRouter = require('./routes/ReviewRoute.js')
+const orderRouter = require('./routes/OrderRoute.js')
 const fileupload = require('express-fileupload')
 const { cloudinaryConnect } = require('./config/cloudinary.js')
 
@@ -37,6 +38,7 @@ app.use(`${api}/product`,productRouter)
 app.use(`${api}/cart`,cartRouter)
 app.use(`${api}/rating`,reviewRouter)
 app.use(`${api}/profile`,profileRouter)
+app.use(`${api}/order`,orderRouter)
 
 
 app.use(notFound);
