@@ -2,6 +2,45 @@ const RatingAndReview = require('../models/Rating.js');
 const User = require('../models/UserModel.js');
 const Product = require('../models/ProductModel.js');
 
+exports.productBuyed = async (req, res) => {
+    try{
+        const id  = req.user.id;
+        const { productId } = req.body;
+    
+        if (!id){
+            return res.status(400).json({
+                success:false,
+                message:'User not found'
+            })
+        } 
+
+        //check if user has buyed the product
+        const buyer = await Product.findOne({
+            _id: productId,
+            buyer: { $elemMatch: { $eq: id } }
+        })
+
+        if (!buyer){
+            return res.status(200).json({
+                success:false,
+                message:'You have not buyed this product'
+            })
+        } 
+        else{
+            return res.status(200).json({
+                success:true,
+                message:'You have buyed this product'
+            })
+        }
+
+
+    }catch(err){
+        return res.status(400).json({
+            success:false,
+            message:err.message
+        })
+    }
+}
 exports.createRatingAndReview = async (req, res) => {
     try {
         const { id } = req.user.id;

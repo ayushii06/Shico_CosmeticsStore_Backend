@@ -207,7 +207,8 @@ exports.getaProduct = asyncHandler(async (req, res) => {
 exports.fetchAllData = async(req,res)=>{
   try{
     const {prodId} = req.body;
-    const product = await ProductModel.findOne({_id: prodId}).populate('ratings').exec(); 
+    const product = await ProductModel.findOne({_id: prodId}).populate(
+      'ratings','buyer').exec(); 
     
     if(!product){
       return res.status(400).json({

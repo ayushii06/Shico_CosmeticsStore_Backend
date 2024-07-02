@@ -58,6 +58,14 @@ exports.payment = async(req,res)=>{
         const paymentResponse = await instance.orders.create(options)
         console.log(paymentResponse)
 
+        product_update = await Product.findByIdAndUpdate(prodId,{
+            $inc : {stock : -quantity},
+            buyer : user_id
+        }
+        )
+
+       await product_update.save()
+
         return res.status(200).json(
             {
                 success : true,
