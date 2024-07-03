@@ -1,6 +1,7 @@
 const mongoose=require('mongoose');
 const bcrypt=require('bcryptjs');
 const mailSender = require("../utils/mailSender");
+const crypto = require('crypto')
 const registrationMessage= require('../mailTemplates/RegistrationSuccess');
 
 var userSchema = new mongoose.Schema({

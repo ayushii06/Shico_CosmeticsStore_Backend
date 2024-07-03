@@ -63,6 +63,17 @@ exports.add_cart_item = async (req,res) => {
             }
             cart.cartTotal += quantity*price;
             cart = await cart.save();
+
+            User.findByIdAndUpdate(userId, {
+                $push: {
+                    cart: cart._id,
+                }
+            },
+                {
+                    new: true,
+                }
+    
+            )
            
             return res.json({
                 success: true,

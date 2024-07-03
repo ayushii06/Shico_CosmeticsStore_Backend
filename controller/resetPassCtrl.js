@@ -1,5 +1,6 @@
 const User = require("../models/UserModel");
 const mailSender = require("../utils/mailSender");
+const bcrypt = require('bcryptjs');
 
 
 exports.generateResetToken = async (req,res)=>{
@@ -11,8 +12,9 @@ exports.generateResetToken = async (req,res)=>{
             return res.status(404).json({message:'User not found'});
         }
     
-        const token = user.createPasswordResetToken();
+        const token = await user.createPasswordResetToken();
     
+        console.log(token)
         const updateUser = await User.findOneAndUpdate(
             {
                 email:email,
@@ -49,7 +51,7 @@ exports.generateResetToken = async (req,res)=>{
 exports.resetPass = async(req,res)=>{
     const {token , password, confirmPassword} = req.body;
     if(!token || !password || !confirmPassword){
-        res.status(400).json({
+        return res.status(400).json({
             success:false,
             message:"All fields are required"
         })
@@ -57,7 +59,7 @@ exports.resetPass = async(req,res)=>{
     }
 
     if(password !== confirmPassword){
-        res.status(400).json({
+        return res.status(400).json({
             success:false,
             message:"Passwords do not match"
         })
@@ -68,14 +70,14 @@ exports.resetPass = async(req,res)=>{
     })
 
     if(!user){
-        res.status(400).json({
+        return res.status(400).json({
             success:false,
             message:'Token is invalid or expired'
         })
     }
 
     if(user.passwordResetExpires < Date.now()){
-        res.status(400).json({
+        return res.status(400).json({
             success:false,
             message:'Token is expired'
         })
@@ -93,5 +95,10 @@ exports.resetPass = async(req,res)=>{
             passwordResetExpires:null,
         }
     )
+
+    return res.status(200).json({
+        success:true,
+        message:"Password reset successfully"
+})
 
 }

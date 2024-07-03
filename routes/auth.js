@@ -3,12 +3,16 @@ const {auth}=require('../middlewares/auth.js')
 const User =require('../models/UserModel.js')
 const {signUp,sendOTP,verifyOTP,login,forgotPassword}=require('../controller/userCtrl.js');
 const router = express.Router();
+const {generateResetToken,resetPass} = require('../controller/resetPassCtrl.js')
 
 router.post('/signup',signUp);
 router.post('/login',login);
 router.post('/otp',sendOTP);
 router.post('/verifyotp',verifyOTP);
 router.post('/forgotPassword',forgotPassword);
+router.post('/generateResetToken',generateResetToken)
+router.post('/resetpassword',resetPass)
+
 
 // router.post("/register", createUser);
 // router.post("/forgot-password-token", forgotPasswordToken);
