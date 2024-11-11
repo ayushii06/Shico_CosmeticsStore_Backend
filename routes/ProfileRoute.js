@@ -1,4 +1,5 @@
 const express=require('express');
+
 const {updateProfile,deleteAccount,getProfile} = require('../controller/profileCtrl.js')
 const {auth}=require('../middlewares/auth.js')
 

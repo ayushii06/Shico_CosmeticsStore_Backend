@@ -29,9 +29,7 @@ exports.localfileUpload = async (req, res) => {
   }
 }
 
-// function isFileTypeSupported(type,supportedTypes){
-//   return supportedTypes.includes(type);
-// }
+
 
 exports.uploadFileToCloudinary = async (file, folder, height, quality) => {
     const options = {folder};
@@ -46,85 +44,3 @@ exports.uploadFileToCloudinary = async (file, folder, height, quality) => {
     return await cloudinary.uploader.upload(file.tempFilePath, options);
 }
 
-
-// exports.imageUpload = async (req, res) => {
-//     try {
-//       const {email} = req.body;
-
-//       const file = req.files.file;
-
-//       //now validate 
-
-//       const supportedTypes = ['png','jpg','jpeg','gif','webp',];
-//       const filetype = file.name.split('.')[1];
-
-//       if(!isFileTypeSupported(filetype,supportedTypes)){
-//         throw new ApiError(400,'File type not supported');
-//       }
-      
-//       const response = await uploadFileToCloudinary(file,'images');
-
-//       const newFile = await file.create({
-//         name,
-//         email,
-//         path:response.secure_url,
-//       })
-
-//       Product.updateOne({email},{$set:{imgsrc:newFile._id}},{new:true});
-//     } catch (error) {
-//       throw new ApiError(500, error.message);
-//     }
-// }
-
-// exports.videoUpload = async (req, res) => {
-//   try {
-//     const { email} = req.body;
-
-//     const file = req.files.videoFile;
-
-//     const supportedTypes = ['mp4','mkv','avi','webm'];
-
-//     const filetype = file.name.split('.')[1];
-
-//       if(!isFileTypeSupported(filetype,supportedTypes)){
-//         throw new ApiError(400,'File type not supported');
-//       }
-      
-//       const response = await uploadFileToCloudinary(file,'videos');
-
-//       const newFile = await file.create({
-//         name,
-//         email,
-//         path:response.secure_url,
-//       })
-
-//   } catch (error) {
-//     throw new ApiError(400, error.message);
-//   }
-// }
-
-// exports.imageSizeReducer = async (req, res) => {
-//   try {
-//     const { email} = req.body;
-
-//     const file = req.files.file;
-
-//     const supportedTypes = ['png','jpg','jpeg','gif','webp',];
-//     const filetype = file.name.split('.')[1];
-      
-//         if(!isFileTypeSupported(filetype,supportedTypes)){
-//           throw new ApiError(400,'File type not supported');
-//         }
-        
-//         const response = await uploadFileToCloudinary(file,'images',30);
-  
-//         const newFile = await file.create({
-//           name,
-//           email,
-//           path:response.secure_url,
-//         })
-
-//   } catch (error) {
-//     throw new ApiError(400,error.message)
-//   }
-// }

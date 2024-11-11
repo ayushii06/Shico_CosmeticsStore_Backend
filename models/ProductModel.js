@@ -1,6 +1,6 @@
 const mongoose = require('mongoose'); 
-const Rating = require('../models/Rating')
 
+//Defining the product model
 var productSchema = new mongoose.Schema({
   product_name: {
     type: String,
@@ -61,4 +61,5 @@ var productSchema = new mongoose.Schema({
   { timestamps: true }
 );
 
+//exporting the model
 module.exports = mongoose.model('Product', productSchema);

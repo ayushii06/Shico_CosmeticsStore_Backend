@@ -1,29 +1,6 @@
 const Profile = require('../models/ProfileModel');
 const User = require('../models/UserModel');
 
-//create profile
-// exports.createProfile = async(req,res)=>{
-//     try {
-//         const {age,dob,gender}=req.body;
-       
-//         if(!age || !dob || !gender){
-//             throw new ApiError(400,'Please fill all the fields')
-//         }
-//         const profile = new Profile({
-//             age,
-//             dob,
-//             gender,
-//         })
-    
-//         await profile.save();
-
-        
-//         res.status(200).json(new ApiSuccess(200,'Profile created successfully'))
-//     } catch (error) {
-//         throw new ApiError(400, error.message)
-//     }
-// }
-
 //update profile
 exports.updateProfile=async(req,res)=>{
     try {
@@ -108,27 +85,36 @@ exports.deleteAccount = async(req,res)=>{
     }
 }
 
+//get the profile
 exports.getProfile = async(req,res)=>{
-    const id = req.user.id;
-
-    if(!id){
-        res.status(500).json({
+    try {
+        const id = req.user.id;
+    
+        if(!id){
+            res.status(500).json({
+                success:false,
+                message:'Please provide the id of the user'
+            })
+        }
+    
+        const user = await User.findById(id)
+        if(!user){
+            res.status(500).json({
+                success:false,
+                message:'User not found'
+            })
+        }
+    
+        const data = await User.findById(id).populate('additionalDetails').exec();
+        res.status(200).json({
+            success:true,
+            data,
+            message:'Profile retrieved successfully'
+        })
+    } catch (error) {
+        res.status(400).json({
             success:false,
-            message:'Please provide the id of the user'
+            message:"some error occured"
         })
     }
-
-    const user = await User.findById(id)
-    if(!user){
-        res.status(500).json({
-            success:false,
-            message:'User not found'
-        })
-    }
-
-    const data = await User.findById(id).populate('additionalDetails').exec();
-    res.status(200).json({
-        success:true,
-        data,
-        message:'Profile retrieved successfully'
-    })}
+}

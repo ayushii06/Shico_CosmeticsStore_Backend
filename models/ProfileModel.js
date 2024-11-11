@@ -1,5 +1,6 @@
 const mongoose = require('mongoose'); 
 
+//creating the profile model
 var profileSchema = new mongoose.Schema({
     age:{
         type:Number,
@@ -11,6 +12,9 @@ var profileSchema = new mongoose.Schema({
         type:String,
     },
     address:{
+        type:String,
+    },
+    avatar:{
         type:String,
     }
 

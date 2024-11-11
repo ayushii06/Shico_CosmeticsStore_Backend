@@ -1,10 +1,9 @@
 const express = require('express')
 require('dotenv').config();
-const { notFound, errorHandler } = require("./middlewares/errorHandler.js");
 const bodyParser = require('body-parser')
-const db=require('./config/connection.js');
-const authRouter = require('./routes/auth.js')
+const db =require('./config/connection.js');
 const cors = require('cors')
+const authRouter = require('./routes/auth.js')
 const productRouter = require('./routes/ProductRoute.js')
 const profileRouter = require('./routes/ProfileRoute.js')
 const cartRouter = require('./routes/CartRoutes.js')
@@ -13,26 +12,35 @@ const orderRouter = require('./routes/OrderRoute.js')
 const fileupload = require('express-fileupload')
 const { cloudinaryConnect } = require('./config/cloudinary.js')
 
+// Connect to the database
 db.connect();
 
+// Set up the API base URL and port from environment variables
 const api = process.env.API_URL;
-//http://localhost:5050/api/shico
 const PORT =  5050;
 const app = express();
-app.use(cors());
+app.use(cors());  // Enable CORS for all routes
 
+// Set up path module for static file serving
 const path = require("path");
+
+// Serve static files from the 'build' directory (for frontend deployment)
 app.use(express.static(path.join(__dirname, "build"))); 
+
+// Configure file upload middleware with temporary file storage
 app.use(fileupload({
   useTempFiles:true,
   tempFileDir:'/tmp/'
 }))
+
+// Connect to Cloudinary for media file uploads
 cloudinaryConnect();
 
-
-//middleware
+// Configure body parser middleware to handle JSON and URL-encoded data
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended:false}));
+
+// Define the API routes for different services (authentication, product, etc.)
 app.use(`${api}/user`,authRouter)
 app.use(`${api}/product`,productRouter)
 app.use(`${api}/cart`,cartRouter)
@@ -40,10 +48,7 @@ app.use(`${api}/rating`,reviewRouter)
 app.use(`${api}/profile`,profileRouter)
 app.use(`${api}/order`,orderRouter)
 
-
-app.use(notFound);
-app.use(errorHandler);
-// start the Express server
+// Start the Express server and listen on the defined port
 app.listen(PORT, () => {
   console.log(api)
   console.log(`Server listening on port localhost "http://localhost:${PORT}"`);

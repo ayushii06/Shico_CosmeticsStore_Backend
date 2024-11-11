@@ -1,6 +1,6 @@
-const mongoose = require('mongoose'); // Erase if already required
+const mongoose = require('mongoose');
 
-// Declare the Schema of the Mongo model
+//defining the rating model
 var ratingSchema = new mongoose.Schema({
     desc:{
         type:String,
@@ -21,4 +21,5 @@ var ratingSchema = new mongoose.Schema({
    
 });
 
+//exporting the model
 module.exports = mongoose.model('Rating', ratingSchema);

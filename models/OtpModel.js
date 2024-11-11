@@ -2,26 +2,29 @@ const mongoose = require('mongoose');
 const mailSender = require("../utils/mailSender");
 const emailTemplate = require('../mailTemplates/verifyOtp.js');
 
+//defining the otp model
 var OTPSchema = new mongoose.Schema({
     email:{
         type:String,
         required:true,
         unique:true,
     },
+
     otp:{
         type:String,
         required:true,
     },
+
     createdAt:{
         type:Date,
         default:Date.now,
-        expires: 2*60,
+        expires: 2*60, //120 sec?
     }
 });
 
+//sending otp on email
 async function sendVerificationEmail(email, otp) {
 	try {
-		console.log("emsil" , email)
 		const mailResponse = await mailSender(
 			email,
 			"Verification Email",
@@ -34,6 +37,7 @@ async function sendVerificationEmail(email, otp) {
 	}
 }
 
+//
 OTPSchema.pre("save", async function (next) {
 	console.log("New document saved to database");
 
@@ -44,4 +48,5 @@ OTPSchema.pre("save", async function (next) {
 	next();
 });
 
+//exporting the model
 module.exports = mongoose.model('Otp', OTPSchema);

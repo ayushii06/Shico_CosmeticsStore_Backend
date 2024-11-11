@@ -1,6 +1,6 @@
 const express=require('express');
-const {createProduct,updateProduct,deleteProduct,getallProducts,getaProduct,fetchAllData,addToWishlist,rating} = require('../controller/productCtrl')
-const {auth,isSeller}=require('../middlewares/auth.js')
+const {createProduct,updateProduct,deleteProduct,getallProducts,getaProduct,fetchAllData,addToWishlist} = require('../controller/productCtrl')
+const {auth,isSeller,isBuyer}=require('../middlewares/auth.js')
 
 const router = express.Router();
 
@@ -11,8 +11,6 @@ router.delete("/delete/:product_id",auth,isSeller,deleteProduct)
 router.get("/getallProducts",getallProducts)
 router.post("/fetchAllData",fetchAllData)
 router.get("/",getaProduct)
-// router.put("/wishlist", fetchuser, addToWishlist);
-// router.put("/rating", fetchuser, rating);
-// router.get("/", getAllProduct);
+router.post("/wishlist", auth, isBuyer, addToWishlist);
 
 module.exports = router;

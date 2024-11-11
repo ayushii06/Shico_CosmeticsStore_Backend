@@ -1,26 +1,26 @@
-const mongoose = require("mongoose"); 
+const mongoose = require("mongoose");
 
+//creating the cart model
 
-var cartSchema = new mongoose.Schema(
-  {
-    products: [
-      {
-        product: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-        },
-        productName: String,
-        imgsrc: String,
-        count: Number,
-        price: Number,
+var cartSchema = new mongoose.Schema({
+  products: [
+    {
+      product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
       },
-    ],
-    cartTotal: Number,
-    orderby: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      productName: String,
+      imgsrc: String,
+      count: Number,
+      price: Number,
     },
+  ],
+  cartTotal: Number,
+  orderby: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
   },
+},
   {
     timestamps: true,
   }
